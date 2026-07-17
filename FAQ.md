@@ -85,7 +85,7 @@ AtlasConvert supports 170+ world currencies including:
 
 ### Can I suggest a new historical coin or unit?
 
-Absolutely! Open a [GitHub Issue](https://github.com/atlas-convert/atlas-convert/issues) with your suggestion. Include:
+Absolutely! Open a [GitHub Issue](https://github.com/hystericallygreat-ops/AtlasConvert-Public/issues) with your suggestion. Include:
 - Name of the coin/unit
 - Historical period
 - Any available data on purchasing power or conversion factors

@@ -32,6 +32,6 @@ AtlasConvert is actively developed. Here's what's planned.
 
 We welcome feedback! Please:
 
-1. Open a [GitHub Issue](https://github.com/atlas-convert/atlas-convert/issues) with your suggestion
+1. Open a [GitHub Issue](https://github.com/hystericallygreat-ops/AtlasConvert-Public/issues) with your suggestion
 2. Join the discussion in existing issues
 3. Contribute code via Pull Requests

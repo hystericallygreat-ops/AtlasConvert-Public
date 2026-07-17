@@ -14,7 +14,7 @@
 
 <br>
 
-[**Try Live App**](https://atlas-convert.vercel.app) · [**API Playground**](playground.html) · [**Docs**](docs/index.html) · [**Themes**](themes.html) · [**GitHub Pages**](https://atlas-convert.github.io/atlas-convert)
+[**Try Live App**](https://atlas-convert.vercel.app) · [**API Playground**](playground.html) · [**Docs**](docs/index.html) · [**Themes**](themes.html) · [**GitHub Pages**](https://hystericallygreat-ops.github.io/AtlasConvert-Public/)
 
 <br>
 
@@ -285,7 +285,7 @@ Apache 2.0 — see [LICENSE](LICENSE).
 
 - 🌐 [atlas-convert.vercel.app](https://atlas-convert.vercel.app)
 - 📧 [atlas.convert@proton.me](mailto:atlas.convert@proton.me)
-- 🐛 [GitHub Issues](https://github.com/atlas-convert/atlas-convert/issues)
+- 🐛 [GitHub Issues](https://github.com/hystericallygreat-ops/AtlasConvert-Public/issues)
 
 ---
 

@@ -39,11 +39,11 @@
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/atlas-convert/atlas-convert.git",
+    "url": "https://github.com/hystericallygreat-ops/AtlasConvert-Public.git",
     "directory": "packages/historical"
   },
-  "homepage": "https://atlas-convert.vercel.app",
+  "homepage": "https://hystericallygreat-ops.github.io/AtlasConvert-Public/",
   "bugs": {
-    "url": "https://github.com/atlas-convert/atlas-convert/issues"
+    "url": "https://github.com/hystericallygreat-ops/AtlasConvert-Public/issues"
   }
 }

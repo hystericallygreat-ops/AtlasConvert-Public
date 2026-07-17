@@ -45,7 +45,7 @@ Feature suggestions are welcome! Please open an issue with:
 
 ```bash
 # Clone the repository
-git clone https://github.com/atlas-convert/atlas-convert.git
+git clone https://github.com/hystericallygreat-ops/AtlasConvert-Public.git
 
 # Install dependencies for the npm package
 cd packages/historical

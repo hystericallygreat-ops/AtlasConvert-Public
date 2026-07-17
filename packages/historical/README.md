@@ -141,8 +141,8 @@ Calculates the current spot price of the coin's gold or silver content using liv
 
 ## Related
 
-- [AtlasConvert](https://atlas-convert.vercel.app) — Full web application
-- [API Documentation](https://atlas-convert.vercel.app/api/convert/historical) — REST API
+- [AtlasConvert](https://hystericallygreat-ops.github.io/AtlasConvert-Public/) — Full web application
+- [API Documentation](https://hystericallygreat-ops.github.io/AtlasConvert-Public/docs/) — REST API
 
 ## License
 
