@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AtlasConvert — Obsidian Themes</title>
+  <meta name="description" content="8 premium obsidian-inspired themes for AtlasConvert. Crafted for extended sessions with museum-grade aesthetics.">
+  <meta property="og:title" content="AtlasConvert — Obsidian Themes">
+  <meta property="og:description" content="8 premium themes crafted for extended sessions.">
+  <meta property="og:image" content="media/og-cover.png">
+  <meta property="og:url" content="https://atlas-convert.vercel.app/themes">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="AtlasConvert Themes">
+  <meta name="twitter:description" content="8 premium obsidian-inspired themes.">
+  <meta name="twitter:image" content="media/og-cover.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="media/icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="media/icon-512.png">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@300;400&family=Cinzel:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #0A0A0A;
+      --gold: #C9A96E;
+      --gold-muted: #8B6F47;
+      --cream: #F5EFE0;
+      --cream-dim: #D9CEBC;
+      --silver: #9AA5B1;
+      --deep: #111214;
+      --panel: #16181C;
+      --border: rgba(201,169,110,0.25);
+      --border-soft: rgba(201,169,110,0.12);
+      --green: #4CAF50;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--ink);
+      color: var(--cream);
+      font-family: 'DM Mono', monospace;
+      font-weight: 300;
+      min-height: 100vh;
+      overflow-x: hidden;
+      line-height: 1.7;
+    }
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(201,169,110,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(201,169,110,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .wrapper {
+      position: relative;
+      z-index: 1;
+      max-width: 1060px;
+      margin: 0 auto;
+      padding: 60px 32px 80px;
+    }
+
+    /* ─── NAV ─── */
+    .nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      background: rgba(10,10,10,0.92);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-soft);
+      padding: 0 32px;
+    }
+    .nav-inner {
+      max-width: 1060px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .nav-logo {
+      font-family: 'Cinzel', serif;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--gold);
+      text-decoration: none;
+      letter-spacing: 0.15em;
+    }
+    .nav-links {
+      display: flex;
+      gap: 28px;
+      list-style: none;
+    }
+    .nav-links a {
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--silver);
+      text-decoration: none;
+      transition: color 0.25s;
+      padding: 4px 0;
+    }
+    .nav-links a:hover,
+    .nav-links a.active {
+      color: var(--gold);
+    }
+
+    /* ─── HEADER ─── */
+    .masthead {
+      text-align: center;
+      margin-bottom: 64px;
+      padding-top: 56px;
+    }
+    .eyebrow {
+      font-size: 10px;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--gold);
+      opacity: 0.75;
+      margin-bottom: 20px;
+      display: block;
+    }
+    h1 {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(28px, 5vw, 46px);
+      font-weight: 400;
+      letter-spacing: 0.12em;
+      color: var(--cream);
+      line-height: 1.1;
+      margin-bottom: 12px;
+    }
+    h1 span { color: var(--gold); }
+    .subtitle {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 18px;
+      color: var(--silver);
+      letter-spacing: 0.04em;
+      margin-bottom: 32px;
+    }
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 0 auto;
+      max-width: 400px;
+    }
+    .divider-line { flex: 1; height: 1px; background: var(--border); }
+    .divider-diamond {
+      width: 6px; height: 6px;
+      border: 1px solid var(--gold);
+      transform: rotate(45deg);
+      flex-shrink: 0;
+    }
+
+    /* ─── SECTION ─── */
+    .section-label {
+      font-size: 9px;
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      color: var(--gold);
+      opacity: 0.6;
+      margin-bottom: 20px;
+    }
+    h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 28px;
+      font-weight: 400;
+      color: var(--cream);
+      margin-bottom: 16px;
+      letter-spacing: 0.02em;
+    }
+    p.section-desc {
+      font-size: 13px;
+      color: var(--silver);
+      margin-bottom: 32px;
+      max-width: 640px;
+      line-height: 1.8;
+    }
+
+    /* ─── THEME GRID ─── */
+    .theme-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1px;
+      background: var(--border-soft);
+      border: 1px solid var(--border);
+      margin-bottom: 80px;
+      overflow: hidden;
+    }
+    .theme-card {
+      background: var(--panel);
+      padding: 28px 24px;
+      transition: background 0.3s;
+      display: flex;
+      flex-direction: column;
+    }
+    .theme-card:hover { background: #1C1F24; }
+
+    /* ─── SWATCHES ─── */
+    .swatch-row {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+    .swatch {
+      width: 28px; height: 28px;
+      border-radius: 4px;
+      border: 1px solid rgba(255,255,255,0.06);
+      flex-shrink: 0;
+    }
+    .swatch-label {
+      font-size: 8px;
+      color: var(--silver);
+      letter-spacing: 0.08em;
+      margin-top: 4px;
+      text-align: center;
+      font-family: 'DM Mono', monospace;
+    }
+    .swatch-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* ─── THEME NAME ─── */
+    .theme-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 20px;
+      font-weight: 400;
+      color: var(--cream);
+      margin-bottom: 6px;
+    }
+    .theme-style {
+      font-size: 9px;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--gold-muted);
+      margin-bottom: 10px;
+    }
+    .theme-desc {
+      font-size: 11px;
+      color: var(--silver);
+      line-height: 1.7;
+      margin-bottom: 18px;
+      flex: 1;
+    }
+
+    /* ─── MOCK UI PREVIEW ─── */
+    .mock-ui {
+      border-radius: 6px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.08);
+      font-family: 'DM Mono', monospace;
+    }
+    .mock-titlebar {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 6px 10px;
+    }
+    .mock-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      opacity: 0.6;
+    }
+    .mock-titlebar span {
+      font-size: 8px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-left: 8px;
+      opacity: 0.5;
+    }
+    .mock-body {
+      padding: 12px 14px 14px;
+    }
+    .mock-input-row {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+    .mock-input {
+      flex: 1;
+      height: 26px;
+      border-radius: 3px;
+      display: flex;
+      align-items: center;
+      padding: 0 8px;
+      font-size: 8px;
+      letter-spacing: 0.05em;
+    }
+    .mock-btn {
+      height: 26px;
+      padding: 0 10px;
+      border-radius: 3px;
+      display: flex;
+      align-items: center;
+      font-size: 7px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-family: 'DM Mono', monospace;
+      font-weight: 400;
+      white-space: nowrap;
+    }
+    .mock-result {
+      border-radius: 3px;
+      padding: 8px 10px;
+      font-size: 8px;
+      line-height: 1.5;
+      letter-spacing: 0.04em;
+    }
+    .mock-result strong {
+      font-weight: 400;
+    }
+
+    /* ─── CTA SECTION ─── */
+    .cta-section {
+      text-align: center;
+      padding: 64px 0 32px;
+      border-top: 1px solid var(--border-soft);
+    }
+    .cta-section h2 {
+      margin-bottom: 12px;
+    }
+    .cta-section p {
+      font-size: 13px;
+      color: var(--silver);
+      margin-bottom: 32px;
+      line-height: 1.8;
+    }
+    .cta-group {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .cta-btn {
+      display: inline-block;
+      padding: 14px 32px;
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      text-decoration: none;
+      border: 1px solid var(--gold);
+      color: var(--gold);
+      background: transparent;
+      transition: all 0.3s;
+    }
+    .cta-btn:hover {
+      background: var(--gold);
+      color: var(--ink);
+    }
+    .cta-btn.primary {
+      background: var(--gold);
+      color: var(--ink);
+    }
+    .cta-btn.primary:hover {
+      background: var(--cream);
+      border-color: var(--cream);
+    }
+
+    /* ─── FOOTER ─── */
+    .footer {
+      text-align: center;
+      padding: 48px 0;
+      border-top: 1px solid var(--border-soft);
+      margin-top: 32px;
+    }
+    .footer p {
+      font-size: 11px;
+      color: var(--silver);
+      margin-bottom: 16px;
+    }
+    .footer a {
+      color: var(--gold);
+      text-decoration: none;
+    }
+    .footer a:hover { text-decoration: underline; }
+    .footer .quote {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 16px;
+      color: var(--cream-dim);
+      margin-bottom: 24px;
+      max-width: 540px;
+      margin-left: auto;
+      margin-right: auto;
+      line-height: 1.7;
+    }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 900px) {
+      .theme-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    @media (max-width: 520px) {
+      .theme-grid {
+        grid-template-columns: 1fr;
+      }
+      .nav-inner { padding: 0; }
+      .nav-links { gap: 16px; }
+      .nav-links a { font-size: 10px; letter-spacing: 0.12em; }
+      .wrapper { padding: 48px 20px 60px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ═══ NAV ═══ -->
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo">ATLASCONVERT</a>
+      <ul class="nav-links">
+        <li><a href="index.html">Landing</a></li>
+        <li><a href="https://atlas-convert.vercel.app">Playground</a></li>
+        <li><a href="docs/index.html">Docs</a></li>
+        <li><a href="themes.html" class="active">Themes</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="wrapper">
+
+    <!-- ═══ HEADER ═══ -->
+    <header class="masthead">
+      <span class="eyebrow">Visual Identity</span>
+      <h1>Obsidian <span>Themes</span></h1>
+      <p class="subtitle">8 premium themes crafted for extended sessions</p>
+      <div class="divider">
+        <div class="divider-line"></div>
+        <div class="divider-diamond"></div>
+        <div class="divider-line"></div>
+      </div>
+    </header>
+
+    <!-- ═══ THEMES SECTION ═══ -->
+    <div class="section-label">The Collection</div>
+    <h2>Choose Your Aesthetic</h2>
+    <p class="section-desc">Each theme is designed for prolonged engagement — museum-grade palettes that reduce eye strain while maintaining the gravitas of historical inquiry.</p>
+
+    <div class="theme-grid">
+
+      <!-- ─── Classic ─── -->
+      <div class="theme-card">
+        <div class="swatch-row">
+          <div class="swatch-group">
+            <div class="swatch" style="background:#8B6F47"></div>
+            <span class="swatch-label">8B6F47</span>
+          </div>
+          <div class="swatch-group">
+            <div class="swatch" style="background:#C9A96E"></div>
+            <span class="swatch-label">C9A96E</span>
+          </div>
+          <div class="swatch-group">
+            <div class="swatch" style="background:#F5EFE0"></div>
+            <span class="swatch-label">F5EFE0</span>
+          </div>
+        </div>
+        <div class="theme-name">Classic</div>
+        <div class="theme-style">Museum Aesthetic</div>
+        <div class="theme-desc">The signature AtlasConvert look — warm browns and aged gold evoking exhibition halls and gilt-edged catalogues.</div>
+        <div class="mock-ui">
+          <div class="mock-titlebar" style="background:#16181C">
+            <div class="mock-dot" style="background:#8B6F47"></div>
+            <div class="mock-dot" style="background:#C9A96E"></div>
+            <div class="mock-dot" style="background:#4CAF50"></div>
+            <span style="color:#8B6F47">Converter</span>
+          </div>
+          <div class="mock-body" style="background:#0A0A0A">
+            <div class="mock-input-row">
+              <div class="mock-input" style="background:#16181C;border:1px solid rgba(139,111,71,0.3);color:#C9A96E">Denarius</div>
+              <div class="mock-btn" style="background:#8B6F47;color:#F5EFE0">Convert</div>
+            </div>
+            <div class="mock-result" style="background:#16181C;color:#C9A96E">
+              <strong>1 Denarius ≈ $24.50</strong><br>
+              <span style="color:#9AA5B1">Roman Empire · Silver · 211 BC</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── Rose Gold ─── -->
+      <div class="theme-card">
+        <div class="swatch-row">
+          <div class="swatch-group">
+            <div class="swatch" style="background:#E8B4B8"></div>
+            <span class="swatch-label">E8B4B8</span>
+          </div>
+          <div class="swatch-group">
+            <div class="swatch" style="background:#B76E79"></div>
+            <span class="swatch-label">B76E79</span>
+          </div>
+          <div class="swatch-group">
+            <div class="swatch" style="background:#F5EFE0"></div>
+            <span class="swatch-label">F5EFE0</span>
+          </div>
+        </div>
+        <div class="theme-name">Rose Gold</div>
+        <div class="theme-style">Elegant Pink</div>
+        <div class="theme-desc">Refined blush tones with metallic warmth — a softer palette inspired by artisan jewelry and boutique patinas.</div>
+        <div class="mock-ui">
+          <div class="mock-titlebar" style="background:#1A1416">
+            <div class="mock-dot" style="background:#E8B4B8"></div>
+            <div class="mock-dot" style="background:#B76E79"></div>
+            <div class="mock-dot" style="background:#4CAF50"></div>
+            <span style="color:#E8B4B8">Converter</span>
+          </div>
+          <div class="mock-body" style="background:#0A0A0A">
+            <div class="mock-input-row">
+              <div class="mock-input" style="background:#1A1416;border:1px solid rgba(183,110,121,0.3);color:#E8B4B8">Dinar</div>
+              <div class="mock-btn" style="background:#B76E79;color:#F5EFE0">Convert</div>
+            </div>
+            <div class="mock-result" style="background:#1A1416;color:#E8B4B8">
+              <strong>1 Dinar ≈ $412.00</strong><br>
+              <span style="color:#9AA5B1">Umayyad · Gold · 696 AD</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── Onyx ─── -->
+      <div class="theme-card">
+        <div class="swatch-row">
+          <div class="swatch-group">
+            <div class="swatch" style="background:#0A0A0A"></div>
+            <span class="swatch-label">0A0A0A</span>
+          </div>
+          <div class="swatch-group">
+            <div class="swatch" style="background:#C9A96E"></div>
+            <span class="swatch-label">C9A96E</span>
+          </div>
+          <div class="swatch-group">
+            <div class="swatch" style="background:#F5EFE0"></div>
+            <span class="swatch-label">F5EFE0</span>
+          </div>
+        </div>
+        <div class="theme-name">Onyx</div>
+        <div class="theme-style">Black & Gold Luxury</div>
+        <div class="theme-desc">Pure darkness punctuated by gold — a high-contrast theme that commands attention like a vault door opening.</div>
+        <div class="mock-ui">
+          <div class="mock-titlebar" style="background:#111111">
+            <div class="mock-dot" style="background:#C9A96E"></div>
+            <div class="mock-dot" style="background:#C9A96E"></div>
+            <div class="mock-dot" style="background:#4CAF50"></div>
+            <span style="color:#C9A96E">Converter</span>
+          </div>
+          <div class="mock-body" style="background:#050505">
+            <div class="mock-input-row">
+              <div class="mock-input" style="background:#111111;border:1px solid rgba(201,169,110,0.4);color:#C9A96E">Solidus</div>
+              <div class="mock-btn" style="background:#C9A96E;color:#0A0A0A">Convert</div>
+            </div>
+            <div class="mock-result" style="background:#111111;color:#C9A96E">
+              <strong>1 Solidus ≈ $580.00</strong><br>
+              <span style="color:#9AA5B1">Byzantine · Gold · 309 AD</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── Emerald ─── -->
+      <div class="theme-card">
+        <div class="swatch-row">
+          <div class="swatch-group">
+            <div class="swatch" style="background:#2D6A4F"></div>
+            <span class="swatch-label">2D6A4F</span>
+          </div>
+          <div class="swatch-group">
+            <div class="swatch" style="background:#52B788"></div>
+            <span class="swatch-label">52B788</span>
+          </div>
+          <div class="swatch-group">
+            <div class="swatch" style="background:#F5EFE0"></div>
+            <span class="swatch-label">F5EFE0</span>
+          </div>
+        </div>
+        <div class="theme-name">Emerald</div>
+        <div class="theme-style">Green & Dark Teal</div>
+        <div class="theme-desc">Deep forest greens with vibrant accents — evoking verdant landscapes and the patina of ancient bronze.</div>
+        <div class="mock-ui">
+          <div class="mock-titlebar" style="background:#1B2E23">
+            <div class="mock-dot" style="background:#52B788"></div>
+            <div class="mock-dot" style="background:#2D6A4F"></div>
+            <div class="mock-dot" style="background:#4CAF50"></div>
+            <span style="color:#52B788">Converter</span>
+          </div>
+          <div class="mock-body" style="background:#0A0A0A">
+            <div class="mock-input-row">
+              <div class="mock-input" style="background:#1B2E23;border:1px solid rgba(45,106,79,0.4);color:#52B788">Drachma</div>
+              <div class="mock-btn" style="background:#2D6A4F;color:#F5EFE0">Convert</div>
+            </div>
+            <div class="mock-result" style="background:#1B2E23;color:#52B788">
+              <strong>1 Drachma ≈ $18.70</strong><br>
+              <span style="color:#9AA5B1">Greece · Silver · 510 BC</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── Cyberpunk ─── -->
+      <div class="theme-card">
+        <div class="swatch-row">
+          <div class="swatch-group">
+            <div class="swatch" style="background:#FF2A6D"></div>
+            <span class="swatch-label">FF2A6D</span>
+          </div>
+          <div class="swatch-group">
+            <div class="swatch" style="background:#05D9E8"></div>
+            <span class="swatch-label">05D9E8</span>
+          </div>
+          <div class="swatch-group">
+            <div class="swatch" style="background:#0A0A0A"></div>
+            <span class="swatch-label">0A0A0A</span>
+          </div>
+        </div>
+        <div class="theme-name">Cyberpunk</div>
+        <div class="theme-style">Neon Pink & Cyan</div>
+        <div class="theme-desc">Neon-drenched and unapologetic — hot pink and electric cyan cutting through absolute black like a Tokyo side street at 3 AM.</div>
+        <div class="mock-ui">
+          <div class="mock-titlebar" style="background:#120A10">
+            <div class="mock-dot" style="background:#FF2A6D"></div>
+            <div class="mock-dot" style="background:#05D9E8"></div>
+            <div class="mock-dot" style="background:#4CAF50"></div>
+            <span style="color:#05D9E8">Converter</span>
+          </div>
+          <div class="mock-body" style="background:#0A0A0A">
+            <div class="mock-input-row">
+              <div class="mock-input" style="background:#120A10;border:1px solid rgba(255,42,109,0.3);color:#05D9E8">Ducat</div>
+              <div class="mock-btn" style="background:#FF2A6D;color:#0A0A0A">Convert</div>
+            </div>
+            <div class="mock-result" style="background:#120A10;color:#FF2A6D">
+              <strong style="color:#05D9E8">1 Ducat ≈ $430.00</strong><br>
+              <span style="color:#9AA5B1">Venice · Gold · 1284 AD</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── Dracula ─── -->
+      <div class="theme-card">
+        <div class="swatch-row">
+          <div class="swatch-group">
+            <div class="swatch" style="background:#BD93F9"></div>
+            <span class="swatch-label">BD93F9</span>
+          </div>
+          <div class="swatch-group">
+            <div class="swatch" style="background:#FF79C6"></div>
+            <span class="swatch-label">FF79C6</span>
+          </div>
+          <div class="swatch-group">
+            <div class="swatch" style="background:#282A36"></div>
+            <span class="swatch-label">282A36</span>
+          </div>
+        </div>
+        <div class="theme-name">Dracula</div>
+        <div class="theme-style">Purple & Dark Gray</div>
+        <div class="theme-desc">The beloved dark palette reinterpreted — rich violets and soft pinks on cool charcoal, equally at home in code or coin catalogs.</div>
+        <div class="mock-ui">
+          <div class="mock-titlebar" style="background:#21222C">
+            <div class="mock-dot" style="background:#BD93F9"></div>
+            <div class="mock-dot" style="background:#FF79C6"></div>
+            <div class="mock-dot" style="background:#4CAF50"></div>
+            <span style="color:#BD93F9">Converter</span>
+          </div>
+          <div class="mock-body" style="background:#282A36">
+            <div class="mock-input-row">
+              <div class="mock-input" style="background:#21222C;border:1px solid rgba(189,147,249,0.3);color:#BD93F9">Florin</div>
+              <div class="mock-btn" style="background:#BD93F9;color:#282A36">Convert</div>
+            </div>
+            <div class="mock-result" style="background:#21222C;color:#BD93F9">
+              <strong>1 Florin ≈ $360.00</strong><br>
+              <span style="color:#6272A4">Florence · Gold · 1252 AD</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── Nord ─── -->
+      <div class="theme-card">
+        <div class="swatch-row">
+          <div class="swatch-group">
+            <div class="swatch" style="background:#88C0D0"></div>
+            <span class="swatch-label">88C0D0</span>
+          </div>
+          <div class="swatch-group">
+            <div class="swatch" style="background:#81A1C1"></div>
+            <span class="swatch-label">81A1C1</span>
+          </div>
+          <div class="swatch-group">
+            <div class="swatch" style="background:#2E3440"></div>
+            <span class="swatch-label">2E3440</span>
+          </div>
+        </div>
+        <div class="theme-name">Nord</div>
+        <div class="theme-style">Ice Blue & Steel</div>
+        <div class="theme-desc">Arctic clarity — cool blues and muted steel that feel like reading manuscripts by northern light through frosted glass.</div>
+        <div class="mock-ui">
+          <div class="mock-titlebar" style="background:#3B4252">
+            <div class="mock-dot" style="background:#88C0D0"></div>
+            <div class="mock-dot" style="background:#81A1C1"></div>
+            <div class="mock-dot" style="background:#4CAF50"></div>
+            <span style="color:#88C0D0">Converter</span>
+          </div>
+          <div class="mock-body" style="background:#2E3440">
+            <div class="mock-input-row">
+              <div class="mock-input" style="background:#3B4252;border:1px solid rgba(136,192,208,0.3);color:#88C0D0">Sestertius</div>
+              <div class="mock-btn" style="background:#81A1C1;color:#2E3440">Convert</div>
+            </div>
+            <div class="mock-result" style="background:#3B4252;color:#88C0D0">
+              <strong>1 Sestertius ≈ $5.20</strong><br>
+              <span style="color:#7B88A1">Roman · Bronze · 211 BC</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── Catppuccin ─── -->
+      <div class="theme-card">
+        <div class="swatch-row">
+          <div class="swatch-group">
+            <div class="swatch" style="background:#CBA6F7"></div>
+            <span class="swatch-label">CBA6F7</span>
+          </div>
+          <div class="swatch-group">
+            <div class="swatch" style="background:#89B4FA"></div>
+            <span class="swatch-label">89B4FA</span>
+          </div>
+          <div class="swatch-group">
+            <div class="swatch" style="background:#1E1E2E"></div>
+            <span class="swatch-label">1E1E2E</span>
+          </div>
+        </div>
+        <div class="theme-name">Catppuccin</div>
+        <div class="theme-style">Lavender & Deep Blue</div>
+        <div class="theme-desc">Pastel dreams on a midnight canvas — soft purples and sky blues that feel like browsing history under a gentle aurora.</div>
+        <div class="mock-ui">
+          <div class="mock-titlebar" style="background:#181825">
+            <div class="mock-dot" style="background:#CBA6F7"></div>
+            <div class="mock-dot" style="background:#89B4FA"></div>
+            <div class="mock-dot" style="background:#4CAF50"></div>
+            <span style="color:#CBA6F7">Converter</span>
+          </div>
+          <div class="mock-body" style="background:#1E1E2E">
+            <div class="mock-input-row">
+              <div class="mock-input" style="background:#181825;border:1px solid rgba(203,166,247,0.3);color:#CBA6F7">Sovereign</div>
+              <div class="mock-btn" style="background:#89B4FA;color:#1E1E2E">Convert</div>
+            </div>
+            <div class="mock-result" style="background:#181825;color:#CBA6F7">
+              <strong>1 Sovereign ≈ $485.00</strong><br>
+              <span style="color:#6C7086">British · Gold · 1817 AD</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ═══ CTA ═══ -->
+    <section class="cta-section">
+      <span class="section-label">Get Started</span>
+      <h2>Try a Theme Live</h2>
+      <p>All 8 themes are available in the live converter. Switch themes instantly without losing your conversion history.</p>
+      <div class="cta-group">
+        <a href="https://atlas-convert.vercel.app" class="cta-btn primary" target="_blank" rel="noopener">Open Converter</a>
+        <a href="docs/index.html" class="cta-btn">Read the Docs</a>
+      </div>
+    </section>
+
+    <!-- ═══ FOOTER ═══ -->
+    <footer class="footer">
+      <p class="quote">"A theme is more than color — it is the light in which history is read."</p>
+      <p>
+        <a href="https://atlas-convert.vercel.app">Live App</a> ·
+        <a href="https://github.com/atlas-convert/atlas-convert">GitHub</a> ·
+        <a href="docs/index.html">Documentation</a>
+      </p>
+      <p style="margin-top: 16px; opacity: 0.5;">Apache 2.0 License</p>
+    </footer>
+
+  </div>
+
+</body>
+</html>

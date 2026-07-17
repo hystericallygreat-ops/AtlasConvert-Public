@@ -1,0 +1,49 @@
+{
+  "name": "atlasconvert-historical",
+  "version": "1.0.0",
+  "description": "Convert historical coins and ancient currencies to modern values. Roman Denarius, Islamic Dinar, Byzantine Solidus, and 12 more.",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "module": "index.mjs",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./index.mjs",
+      "require": "./index.js"
+    }
+  },
+  "files": [
+    "index.js",
+    "index.mjs",
+    "index.d.ts",
+    "README.md"
+  ],
+  "scripts": {
+    "test": "node test.js"
+  },
+  "keywords": [
+    "historical",
+    "currency",
+    "conversion",
+    "numismatics",
+    "roman",
+    "denarius",
+    "dinar",
+    "solidus",
+    "ancient",
+    "coins",
+    "metrology",
+    "api"
+  ],
+  "author": "AtlasConvert",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/atlas-convert/atlas-convert.git",
+    "directory": "packages/historical"
+  },
+  "homepage": "https://atlas-convert.vercel.app",
+  "bugs": {
+    "url": "https://github.com/atlas-convert/atlas-convert/issues"
+  }
+}

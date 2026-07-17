@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AtlasConvert — Convert Ancient Coins to Modern Currency</title>
+  <meta name="description" content="Convert Roman Denarii, Islamic Dinars, Byzantine Solidi and 12 more historical coins to modern currencies with academic accuracy. 170+ live rates, 17 traditional units, AI-powered.">
+  <meta name="keywords" content="historical currency converter, roman denarius value, ancient coin calculator, numismatics API, historical purchasing power, metrology">
+  <meta property="og:title" content="AtlasConvert — Convert Ancient Coins to Modern Currency">
+  <meta property="og:description" content="15+ historical coins, 17 traditional units, 170+ live currencies. Deterministic engine, never hallucinates.">
+  <meta property="og:image" content="media/og-cover.png">
+  <meta property="og:url" content="https://atlas-convert.vercel.app">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="AtlasConvert">
+  <meta name="twitter:description" content="Convert ancient coins to modern currencies with academic accuracy.">
+  <meta name="twitter:image" content="media/og-cover.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="media/icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="media/icon-512.png">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@300;400&family=Cinzel:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #0A0A0A;
+      --gold: #C9A96E;
+      --gold-muted: #8B6F47;
+      --cream: #F5EFE0;
+      --cream-dim: #D9CEBC;
+      --silver: #9AA5B1;
+      --deep: #111214;
+      --panel: #16181C;
+      --border: rgba(201,169,110,0.25);
+      --border-soft: rgba(201,169,110,0.12);
+      --green: #4CAF50;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; scroll-padding-top: 64px; }
+    body {
+      background: var(--ink);
+      color: var(--cream);
+      font-family: 'DM Mono', monospace;
+      font-weight: 300;
+      min-height: 100vh;
+      overflow-x: hidden;
+      line-height: 1.7;
+    }
+
+    /* ─── GRID OVERLAY ─── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(201,169,110,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(201,169,110,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ─── STICKY NAV ─── */
+    .topnav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      background: rgba(10,10,10,0.92);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-soft);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 0 24px;
+      height: 56px;
+    }
+    .topnav a {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--silver);
+      text-decoration: none;
+      padding: 8px 16px;
+      border: 1px solid transparent;
+      border-radius: 2px;
+      transition: color 0.25s, border-color 0.25s, background 0.25s;
+    }
+    .topnav a:hover,
+    .topnav a.active {
+      color: var(--gold);
+      border-color: var(--border);
+      background: rgba(201,169,110,0.05);
+    }
+
+    /* ─── WRAPPER ─── */
+    .wrapper {
+      position: relative;
+      z-index: 1;
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 120px 32px 80px;
+    }
+
+    /* ─── HEADER / HERO ─── */
+    .masthead {
+      text-align: center;
+      margin-bottom: 64px;
+    }
+    .eyebrow {
+      font-size: 10px;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--gold);
+      opacity: 0.75;
+      margin-bottom: 20px;
+      display: block;
+    }
+    .logo-ring {
+      width: 80px; height: 80px;
+      margin: 0 auto 24px;
+    }
+    .logo-ring svg { width: 100%; height: 100%; }
+    h1 {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(28px, 5vw, 46px);
+      font-weight: 400;
+      letter-spacing: 0.12em;
+      color: var(--cream);
+      line-height: 1.1;
+      margin-bottom: 12px;
+    }
+    h1 span { color: var(--gold); }
+    .tagline {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 18px;
+      color: var(--silver);
+      letter-spacing: 0.04em;
+      margin-bottom: 32px;
+    }
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 0 auto;
+      max-width: 400px;
+    }
+    .divider-line { flex: 1; height: 1px; background: var(--border); }
+    .divider-diamond {
+      width: 6px; height: 6px;
+      border: 1px solid var(--gold);
+      transform: rotate(45deg);
+      flex-shrink: 0;
+    }
+
+    /* ─── CTA BUTTONS ─── */
+    .cta-group {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      margin-top: 32px;
+      flex-wrap: wrap;
+    }
+    .cta-btn {
+      display: inline-block;
+      padding: 14px 32px;
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      text-decoration: none;
+      border: 1px solid var(--gold);
+      color: var(--gold);
+      background: transparent;
+      transition: all 0.3s;
+    }
+    .cta-btn:hover {
+      background: var(--gold);
+      color: var(--ink);
+    }
+    .cta-btn.primary {
+      background: var(--gold);
+      color: var(--ink);
+    }
+    .cta-btn.primary:hover {
+      background: var(--cream);
+      border-color: var(--cream);
+    }
+
+    /* ─── STAT STRIP ─── */
+    .stat-strip {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: var(--border-soft);
+      border: 1px solid var(--border);
+      margin-bottom: 64px;
+      overflow: hidden;
+    }
+    .stat-cell {
+      background: var(--panel);
+      padding: 28px 20px;
+      text-align: center;
+    }
+    .stat-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 40px;
+      font-weight: 300;
+      color: var(--gold);
+      line-height: 1;
+      display: block;
+      margin-bottom: 6px;
+    }
+    .stat-label {
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      color: var(--silver);
+      text-transform: uppercase;
+    }
+
+    /* ─── SECTIONS ─── */
+    .section-label {
+      font-size: 9px;
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      color: var(--gold);
+      opacity: 0.6;
+      margin-bottom: 20px;
+    }
+    h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 28px;
+      font-weight: 400;
+      color: var(--cream);
+      margin-bottom: 16px;
+      letter-spacing: 0.02em;
+    }
+    p.section-desc {
+      font-size: 13px;
+      color: var(--silver);
+      margin-bottom: 32px;
+      max-width: 640px;
+      line-height: 1.8;
+    }
+
+    /* ─── SCREENSHOTS ─── */
+    .screenshots { margin-bottom: 64px; }
+    .screenshot-card {
+      border: 1px solid var(--border);
+      background: var(--panel);
+      margin-bottom: 24px;
+      overflow: hidden;
+    }
+    .screenshot-card img {
+      width: 100%;
+      display: block;
+      border-bottom: 1px solid var(--border-soft);
+    }
+    .screenshot-info { padding: 24px 28px; }
+    .screenshot-tag {
+      font-size: 8px;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--green);
+      border: 1px solid var(--green);
+      padding: 3px 8px;
+      display: inline-block;
+      margin-bottom: 12px;
+    }
+    .screenshot-card h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 20px;
+      font-weight: 400;
+      color: var(--cream);
+      margin-bottom: 8px;
+    }
+    .screenshot-card p {
+      font-size: 12px;
+      color: var(--silver);
+      line-height: 1.8;
+    }
+
+    /* ─── FEATURES GRID ─── */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1px;
+      background: var(--border-soft);
+      border: 1px solid var(--border);
+      margin-bottom: 64px;
+      overflow: hidden;
+    }
+    .feature-card {
+      background: var(--panel);
+      padding: 32px 28px;
+      transition: background 0.3s;
+    }
+    .feature-card:hover { background: #1C1F24; }
+    .feature-icon {
+      font-size: 24px;
+      margin-bottom: 14px;
+      display: block;
+    }
+    .feature-card h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 20px;
+      font-weight: 400;
+      color: var(--cream);
+      margin-bottom: 8px;
+    }
+    .feature-card p {
+      font-size: 11px;
+      color: var(--silver);
+      line-height: 1.8;
+    }
+
+    /* ─── HOW IT WORKS ─── */
+    .steps {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      background: var(--border-soft);
+      border: 1px solid var(--border);
+      margin-bottom: 64px;
+      overflow: hidden;
+    }
+    .step {
+      display: flex;
+      align-items: flex-start;
+      gap: 24px;
+      background: var(--panel);
+      padding: 24px 28px;
+      transition: background 0.3s;
+    }
+    .step:hover { background: #1C1F24; }
+    .step-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 32px;
+      font-weight: 300;
+      color: var(--gold);
+      opacity: 0.5;
+      line-height: 1;
+      min-width: 36px;
+      flex-shrink: 0;
+      padding-top: 2px;
+    }
+    .step-content h4 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 18px;
+      font-weight: 400;
+      color: var(--cream);
+      margin-bottom: 4px;
+    }
+    .step-content p {
+      font-size: 11px;
+      color: var(--silver);
+      line-height: 1.75;
+    }
+
+    /* ─── FAQ ACCORDION ─── */
+    .faq-list {
+      margin-bottom: 64px;
+    }
+    .faq-item {
+      border: 1px solid var(--border-soft);
+      margin-bottom: -1px;
+    }
+    .faq-q {
+      width: 100%;
+      background: var(--panel);
+      border: none;
+      padding: 20px 28px;
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      transition: background 0.3s;
+    }
+    .faq-q:hover { background: #1C1F24; }
+    .faq-q span {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 17px;
+      font-weight: 400;
+      color: var(--cream);
+    }
+    .faq-q .chevron {
+      font-family: 'DM Mono', monospace;
+      font-size: 14px;
+      color: var(--gold);
+      transition: transform 0.3s;
+      flex-shrink: 0;
+    }
+    .faq-item.open .faq-q .chevron { transform: rotate(180deg); }
+    .faq-a {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s ease;
+      background: var(--panel);
+    }
+    .faq-item.open .faq-a { max-height: 600px; }
+    .faq-a-inner {
+      padding: 0 28px 20px;
+      font-size: 12px;
+      color: var(--silver);
+      line-height: 1.85;
+    }
+    .faq-a-inner strong {
+      color: var(--cream-dim);
+    }
+
+    /* ─── FOOTER ─── */
+    .footer {
+      text-align: center;
+      padding: 48px 0;
+      border-top: 1px solid var(--border-soft);
+    }
+    .footer p {
+      font-size: 11px;
+      color: var(--silver);
+      margin-bottom: 16px;
+    }
+    .footer a {
+      color: var(--gold);
+      text-decoration: none;
+    }
+    .footer a:hover { text-decoration: underline; }
+    .footer .quote {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 16px;
+      color: var(--cream-dim);
+      max-width: 600px;
+      margin: 0 auto 24px;
+      line-height: 1.6;
+    }
+
+    /* ─── SCROLL REVEAL ─── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.8s cubic-bezier(0.16,1,0.3,1), transform 0.8s cubic-bezier(0.16,1,0.3,1);
+    }
+    .reveal.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 768px) {
+      .wrapper { padding: 100px 20px 60px; }
+      .stat-strip { grid-template-columns: 1fr; }
+      .features-grid { grid-template-columns: 1fr; }
+      .cta-group { flex-direction: column; align-items: center; }
+      .topnav { gap: 2px; padding: 0 8px; }
+      .topnav a { padding: 8px 10px; font-size: 9px; letter-spacing: 0.1em; }
+      .screenshot-info { padding: 20px; }
+      .step { flex-direction: column; gap: 12px; }
+    }
+  </style>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "AtlasConvert",
+    "url": "https://atlas-convert.vercel.app",
+    "description": "Convert ancient coins and traditional units to modern currencies with academic accuracy.",
+    "applicationCategory": "UtilityApplication",
+    "operatingSystem": "Web",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+  }
+  </script>
+</head>
+<body>
+
+  <!-- ═══ STICKY NAV ═══ -->
+  <nav class="topnav">
+    <a href="index.html" class="active">Landing</a>
+    <a href="playground.html">API Playground</a>
+    <a href="docs/index.html">Docs</a>
+    <a href="themes.html">Themes</a>
+  </nav>
+
+  <div class="wrapper">
+
+    <!-- ═══ HERO ═══ -->
+    <header class="masthead">
+      <span class="eyebrow">Precision Conversion Engine</span>
+      <div class="logo-ring">
+        <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="40" cy="40" r="38" stroke="#C9A96E" stroke-width="0.75" opacity="0.4"/>
+          <circle cx="40" cy="40" r="30" stroke="#C9A96E" stroke-width="0.5" opacity="0.25"/>
+          <circle cx="40" cy="40" r="22" stroke="#C9A96E" stroke-width="0.5" opacity="0.2"/>
+          <g stroke="#C9A96E" stroke-width="0.75" opacity="0.6">
+            <line x1="40" y1="2" x2="40" y2="8"/>
+            <line x1="40" y1="72" x2="40" y2="78"/>
+            <line x1="2" y1="40" x2="8" y2="40"/>
+            <line x1="72" y1="40" x2="78" y2="40"/>
+          </g>
+          <line class="hand-hour" x1="40" y1="40" x2="40" y2="16" stroke="#C9A96E" stroke-width="1" opacity="0.9"/>
+          <line class="hand-minute" x1="40" y1="40" x2="58" y2="40" stroke="#C9A96E" stroke-width="0.75" opacity="0.6"/>
+          <circle cx="40" cy="40" r="2.5" fill="#C9A96E" opacity="0.8"/>
+          <polygon points="40,18 42.5,25 40,22 37.5,25" fill="#C9A96E" opacity="0.4"/>
+        </svg>
+      </div>
+      <h1>ATLAS<span>CONVERT</span></h1>
+      <p class="tagline">Convert ancient coins, traditional units, and modern currencies with academic precision</p>
+      <div class="divider">
+        <div class="divider-line"></div>
+        <div class="divider-diamond"></div>
+        <div class="divider-line"></div>
+      </div>
+      <div class="cta-group">
+        <a href="https://atlas-convert.vercel.app" class="cta-btn primary">Try Live App</a>
+        <a href="https://github.com/atlas-convert/atlas-convert" class="cta-btn">View on GitHub</a>
+      </div>
+    </header>
+
+    <!-- ═══ STATS ═══ -->
+    <div class="stat-strip reveal">
+      <div class="stat-cell">
+        <span class="stat-num">15+</span>
+        <span class="stat-label">Historical Coins</span>
+      </div>
+      <div class="stat-cell">
+        <span class="stat-num">17</span>
+        <span class="stat-label">Traditional Units</span>
+      </div>
+      <div class="stat-cell">
+        <span class="stat-num">170+</span>
+        <span class="stat-label">Live Currencies</span>
+      </div>
+    </div>
+
+    <!-- ═══ SCREENSHOTS ═══ -->
+    <section class="screenshots reveal">
+      <span class="section-label">See It In Action</span>
+      <h2>A Museum in Your Browser</h2>
+      <p class="section-desc">AtlasConvert combines a deterministic conversion engine with a beautiful, immersive interface. Every result is backed by academic data &mdash; never hallucinated.</p>
+
+      <div class="screenshot-card">
+        <img src="screenshots/converter.png" alt="AtlasConvert Currency Converter" loading="lazy">
+        <div class="screenshot-info">
+          <span class="screenshot-tag">Core Feature</span>
+          <h3>Currency Converter</h3>
+          <p>170+ world currencies with live exchange rates, historical charts, and the unique Moroccan Colloquial Engine. Categories span distance, weight, temperature, area, volume, speed, and more.</p>
+        </div>
+      </div>
+
+      <div class="screenshot-card">
+        <img src="screenshots/museum.png" alt="AtlasConvert Historical Museum" loading="lazy">
+        <div class="screenshot-info">
+          <span class="screenshot-tag">Historical Data</span>
+          <h3>Historical Museum</h3>
+          <p>15+ ancient coins from Rome, Byzantium, Islamic Caliphates, Medieval Europe, and Asia. Each shows purchasing power, metal value, academic sources, and coin condition grading.</p>
+        </div>
+      </div>
+
+      <div class="screenshot-card">
+        <img src="screenshots/traditional-units.png" alt="AtlasConvert Traditional Units" loading="lazy">
+        <div class="screenshot-info">
+          <span class="screenshot-tag">Cultural Heritage</span>
+          <h3>Traditional Units</h3>
+          <p>17 measurement systems from Morocco, Saudi Arabia, Ottoman Empire, Japan, Rome, China, and literary traditions. Filter by region, explore formulas, and convert instantly.</p>
+        </div>
+      </div>
+
+      <div class="screenshot-card">
+        <img src="screenshots/ai-agent.png" alt="AtlasConvert AI Agent" loading="lazy">
+        <div class="screenshot-info">
+          <span class="screenshot-tag">AI-Native</span>
+          <h3>AI Agent Integration</h3>
+          <p>When an LLM handles questions about ancient currencies, it maps intent to high-precision tool schemas instead of hallucinating. The AI explains history; the engine computes numbers.</p>
+        </div>
+      </div>
+
+      <div class="screenshot-card">
+        <img src="screenshots/api-playground.png" alt="AtlasConvert API Playground" loading="lazy">
+        <div class="screenshot-info">
+          <span class="screenshot-tag">Developer API</span>
+          <h3>Dynamic API Playground</h3>
+          <p>Test live REST API requests with accuracy logs, confidence parameters, and copy-pasteable cURL commands. Full OpenAPI schema included.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ FEATURES ═══ -->
+    <section class="reveal">
+      <span class="section-label">Capabilities</span>
+      <h2>What AtlasConvert Does</h2>
+      <div class="features-grid">
+        <div class="feature-card">
+          <span class="feature-icon">🏛️</span>
+          <h3>Historical Coins</h3>
+          <p>15+ coins with purchasing power estimates, precious metal content, and live conversion. Academic sources cited for every entry.</p>
+        </div>
+        <div class="feature-card">
+          <span class="feature-icon">📏</span>
+          <h3>Traditional Units</h3>
+          <p>17 measurement systems from 7 civilizations. Moroccan Abra, Japanese Shaku, Ottoman Dirhem, Roman Pes, and more.</p>
+        </div>
+        <div class="feature-card">
+          <span class="feature-icon">💱</span>
+          <h3>Live Currencies</h3>
+          <p>170+ world currencies with live exchange rates. Includes Moroccan colloquial Rials and Scentims with souk pricing context.</p>
+        </div>
+        <div class="feature-card">
+          <span class="feature-icon">🤖</span>
+          <h3>AI Assistant</h3>
+          <p>Specialized numismatic AI that never hallucinates. Uses tool-calling for deterministic accuracy with historical context.</p>
+        </div>
+        <div class="feature-card">
+          <span class="feature-icon">🗺️</span>
+          <h3>Atlas Map</h3>
+          <p>Interactive SVG world map with civilization markers. Color-coded by metal type with auto-tour mode.</p>
+        </div>
+        <div class="feature-card">
+          <span class="feature-icon">🎨</span>
+          <h3>8 Premium Themes</h3>
+          <p>Obsidian-inspired themes: Classic, Rose Gold, Onyx, Emerald, Cyberpunk, Dracula, Nord, Catppuccin.</p>
+        </div>
+        <div class="feature-card">
+          <span class="feature-icon">🔌</span>
+          <h3>Embeddable Widget</h3>
+          <p>Add AtlasConvert to any website with a simple iframe. Customizable theme, language, and default units.</p>
+        </div>
+        <div class="feature-card">
+          <span class="feature-icon">📱</span>
+          <h3>PWA &mdash; Offline Ready</h3>
+          <p>Install on any device. Works offline with cached data and syncs when reconnected.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ HOW IT WORKS ═══ -->
+    <section class="reveal">
+      <span class="section-label">How It Works</span>
+      <h2>Three Steps to History</h2>
+      <div class="steps">
+        <div class="step">
+          <span class="step-num">1</span>
+          <div class="step-content">
+            <h4>Choose Your Unit</h4>
+            <p>Select from 15+ historical coins, 17 traditional units, or 170+ modern currencies. Search by name in any language.</p>
+          </div>
+        </div>
+        <div class="step">
+          <span class="step-num">2</span>
+          <div class="step-content">
+            <h4>Get Instant Conversion</h4>
+            <p>See the result with purchasing power data, metal value, academic sources, and confidence levels. No guessing.</p>
+          </div>
+        </div>
+        <div class="step">
+          <span class="step-num">3</span>
+          <div class="step-content">
+            <h4>Explore the Context</h4>
+            <p>Read about the coin's history, its role in trade, and how it compares to modern equivalents. Learn while you convert.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ FAQ ═══ -->
+    <section class="reveal">
+      <span class="section-label">Frequently Asked Questions</span>
+      <h2>FAQ</h2>
+      <div class="faq-list">
+
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">
+            <span>What is AtlasConvert?</span>
+            <span class="chevron">&#9662;</span>
+          </button>
+          <div class="faq-a">
+            <div class="faq-a-inner">
+              AtlasConvert is an interactive museum and conversion engine for measurement systems across civilizations. It bridges modern currencies, historical coins, traditional regional units, and standard metric/imperial units in a trilingual (FR/EN/AR) Progressive Web App.
+            </div>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">
+            <span>Is AtlasConvert free to use?</span>
+            <span class="chevron">&#9662;</span>
+          </button>
+          <div class="faq-a">
+            <div class="faq-a-inner">
+              Yes! The core converter is completely free. The API has a free Sandbox tier (100 requests/month). Pro and Enterprise tiers are available for higher usage.
+            </div>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">
+            <span>Does AtlasConvert work offline?</span>
+            <span class="chevron">&#9662;</span>
+          </button>
+          <div class="faq-a">
+            <div class="faq-a-inner">
+              Yes! AtlasConvert is a PWA that works offline. Currency rates are cached locally, and you can access previously viewed historical data without an internet connection.
+            </div>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">
+            <span>How accurate are the historical conversions?</span>
+            <span class="chevron">&#9662;</span>
+          </button>
+          <div class="faq-a">
+            <div class="faq-a-inner">
+              AtlasConvert uses two validated approaches:<br><br>
+              <strong>1. Purchasing Power</strong> &mdash; Academic estimates of what a coin could buy in its era, converted to modern equivalents.<br>
+              <strong>2. Metal Value</strong> &mdash; Current spot prices for gold/silver content.<br><br>
+              Both methods have known limitations that are clearly documented. The app provides confidence levels and source citations for all conversions.
+            </div>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">
+            <span>Where does the historical data come from?</span>
+            <span class="chevron">&#9662;</span>
+          </button>
+          <div class="faq-a">
+            <div class="faq-a-inner">
+              Our data is compiled from academic sources including numismatic reference works, economic history publications, museum catalogs, and archaeological reports. Each coin entry includes citations to specific sources.
+            </div>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">
+            <span>Why doesn't the AI just compute conversions directly?</span>
+            <span class="chevron">&#9662;</span>
+          </button>
+          <div class="faq-a">
+            <div class="faq-a-inner">
+              LLMs (including GPT-4, Gemini, Claude) systematically hallucinate historical conversion rates. They invent precise-sounding numbers that are often wrong by orders of magnitude. AtlasConvert's AI uses tool-calling: the LLM explains the history, then calls a deterministic engine for the actual math. This guarantees accuracy.
+            </div>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">
+            <span>What browsers are supported?</span>
+            <span class="chevron">&#9662;</span>
+          </button>
+          <div class="faq-a">
+            <div class="faq-a-inner">
+              AtlasConvert supports all modern browsers: Chrome 90+, Firefox 88+, Safari 14+, and Edge 90+.
+            </div>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">
+            <span>Is there an API?</span>
+            <span class="chevron">&#9662;</span>
+          </button>
+          <div class="faq-a">
+            <div class="faq-a-inner">
+              Yes! AtlasConvert provides a public REST API with three endpoints:<br><br>
+              <strong>/api/convert/historical</strong> &mdash; Historical coin conversions<br>
+              <strong>/api/convert/traditional</strong> &mdash; Traditional unit conversions<br>
+              <strong>/api/convert/official</strong> &mdash; Standard unit conversions<br><br>
+              See the <a href="docs/api.html" style="color:var(--gold)">API Documentation</a> for details.
+            </div>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">
+            <span>Can I embed AtlasConvert on my website?</span>
+            <span class="chevron">&#9662;</span>
+          </button>
+          <div class="faq-a">
+            <div class="faq-a-inner">
+              Yes! AtlasConvert provides an embeddable widget via iframe. You can customize the theme, language, and default conversion units. See the <a href="docs/index.html" style="color:var(--gold)">Integration Guide</a>.
+            </div>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">
+            <span>What languages are supported?</span>
+            <span class="chevron">&#9662;</span>
+          </button>
+          <div class="faq-a">
+            <div class="faq-a-inner">
+              AtlasConvert is fully trilingual:<br><br>
+              <strong>French</strong> (fr) &mdash; Full support<br>
+              <strong>English</strong> (en) &mdash; Full support<br>
+              <strong>Arabic</strong> (ar) &mdash; Full support with RTL layout
+            </div>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">
+            <span>How often are exchange rates updated?</span>
+            <span class="chevron">&#9662;</span>
+          </button>
+          <div class="faq-a">
+            <div class="faq-a-inner">
+              Live exchange rates are updated regularly throughout the day. Historical rates are cached for optimal performance.
+            </div>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">
+            <span>Is AtlasConvert open source?</span>
+            <span class="chevron">&#9662;</span>
+          </button>
+          <div class="faq-a">
+            <div class="faq-a-inner">
+              This public repository (documentation, examples, landing page) is licensed under Apache 2.0. The <code>atlasconvert-historical</code> npm package is also Apache 2.0. The full application source code is not published.
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ═══ FOOTER ═══ -->
+    <footer class="footer">
+      <p class="quote">"The Roman Denarius wasn't just a coin. It was a day's work, a soldier's pay, a merchant's trust. Now you can hold that history in your hand."</p>
+      <p>
+        <a href="https://atlas-convert.vercel.app">Live App</a> &middot;
+        <a href="playground.html">API Playground</a> &middot;
+        <a href="docs/index.html">Docs</a> &middot;
+        <a href="themes.html">Themes</a> &middot;
+        <a href="https://github.com/atlas-convert/atlas-convert">GitHub</a> &middot;
+        <a href="mailto:atlas.convert@proton.me">Contact</a>
+      </p>
+      <p style="margin-top: 16px; opacity: 0.5;">Apache 2.0 License</p>
+    </footer>
+
+  </div>
+
+  <script>
+    // FAQ accordion
+    function toggleFaq(btn) {
+      var item = btn.closest('.faq-item');
+      var isOpen = item.classList.contains('open');
+      // close all
+      document.querySelectorAll('.faq-item').forEach(function(el) { el.classList.remove('open'); });
+      // toggle clicked
+      if (!isOpen) item.classList.add('open');
+    }
+
+    // Clock hand rotation
+    (function() {
+      var style = document.createElement('style');
+      style.textContent = '@keyframes rotateHand{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}.hand-hour{transform-origin:40px 40px;animation:rotateHand 120s linear infinite}.hand-minute{transform-origin:40px 40px;animation:rotateHand 15s linear infinite}';
+      document.head.appendChild(style);
+    })();
+
+    // Scroll reveal
+    document.addEventListener('DOMContentLoaded', function() {
+      var reveals = document.querySelectorAll('.reveal');
+      var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('active');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+      reveals.forEach(function(el) { observer.observe(el); });
+      // show first items immediately
+      setTimeout(function() {
+        var first = document.querySelector('.reveal');
+        if (first) first.classList.add('active');
+      }, 100);
+    });
+  </script>
+
+</body>
+</html>

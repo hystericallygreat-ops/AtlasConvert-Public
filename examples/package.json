@@ -1,0 +1,14 @@
+{
+  "name": "atlasconvert-api-example",
+  "version": "1.0.0",
+  "description": "Example project demonstrating AtlasConvert API integration",
+  "scripts": {
+    "historical": "node historical.js",
+    "traditional": "node traditional.js",
+    "live-rates": "node live-rates.js"
+  },
+  "dependencies": {
+    "node-fetch": "^3.3.0"
+  },
+  "license": "Apache-2.0"
+}

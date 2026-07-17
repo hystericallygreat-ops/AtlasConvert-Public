@@ -1,0 +1,1555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AtlasConvert — Documentation</title>
+  <meta name="description" content="AtlasConvert documentation: API reference, features, architecture, integrations, comparisons, and use cases for historical currency conversion.">
+  <link rel="icon" type="image/png" sizes="192x192" href="../media/icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="../media/icon-512.png">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@300;400&family=Cinzel:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #0A0A0A;
+      --gold: #C9A96E;
+      --gold-muted: #8B6F47;
+      --cream: #F5EFE0;
+      --cream-dim: #D9CEBC;
+      --silver: #9AA5B1;
+      --deep: #111214;
+      --panel: #16181C;
+      --border: rgba(201,169,110,0.25);
+      --border-soft: rgba(201,169,110,0.12);
+      --green: #4CAF50;
+      --sidebar-w: 260px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; scroll-padding-top: 72px; }
+    body {
+      background: var(--ink);
+      color: var(--cream);
+      font-family: 'DM Mono', monospace;
+      font-weight: 300;
+      min-height: 100vh;
+      overflow-x: hidden;
+      line-height: 1.7;
+    }
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(201,169,110,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(201,169,110,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ─── TOP NAV ─── */
+    .topnav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 32px; height: 56px;
+      background: rgba(10,10,10,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-soft);
+    }
+    .topnav-logo {
+      font-family: 'Cinzel', serif; font-size: 15px; font-weight: 400;
+      letter-spacing: 0.1em; color: var(--cream); text-decoration: none;
+    }
+    .topnav-logo span { color: var(--gold); }
+    .topnav-links { display: flex; gap: 28px; align-items: center; }
+    .topnav-links a {
+      font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase;
+      color: var(--silver); text-decoration: none; transition: color 0.2s;
+    }
+    .topnav-links a:hover, .topnav-links a.active { color: var(--gold); }
+    .hamburger {
+      display: none; background: none; border: none; cursor: pointer; padding: 4px;
+    }
+    .hamburger svg { width: 22px; height: 22px; stroke: var(--cream); }
+
+    /* ─── LAYOUT ─── */
+    .layout {
+      display: flex; position: relative; z-index: 1;
+      margin-top: 56px; min-height: calc(100vh - 56px);
+    }
+
+    /* ─── SIDEBAR ─── */
+    .sidebar {
+      position: fixed; top: 56px; left: 0; bottom: 0;
+      width: var(--sidebar-w);
+      background: var(--deep);
+      border-right: 1px solid var(--border-soft);
+      overflow-y: auto; padding: 24px 0;
+      display: flex; flex-direction: column;
+      transition: transform 0.3s ease;
+    }
+    .sidebar-search {
+      padding: 0 16px 16px;
+    }
+    .sidebar-search input {
+      width: 100%; padding: 10px 12px;
+      background: var(--panel); border: 1px solid var(--border-soft);
+      color: var(--cream); font-family: 'DM Mono', monospace;
+      font-size: 11px; letter-spacing: 0.04em;
+      outline: none; transition: border-color 0.2s;
+    }
+    .sidebar-search input::placeholder { color: var(--gold-muted); opacity: 0.6; }
+    .sidebar-search input:focus { border-color: var(--gold); }
+    .sidebar-search .search-icon {
+      position: absolute; left: 28px; top: 82px;
+      pointer-events: none; opacity: 0.4;
+    }
+    .sidebar-section {
+      font-size: 8px; letter-spacing: 0.3em; text-transform: uppercase;
+      color: var(--gold); opacity: 0.5; padding: 12px 20px 6px;
+    }
+    .sidebar nav { flex: 1; }
+    .sidebar nav a {
+      display: block; padding: 8px 20px; font-size: 12px;
+      color: var(--silver); text-decoration: none;
+      border-left: 2px solid transparent;
+      transition: all 0.2s;
+    }
+    .sidebar nav a:hover {
+      color: var(--cream); background: rgba(201,169,110,0.04);
+      border-left-color: var(--gold-muted);
+    }
+    .sidebar nav a.active {
+      color: var(--gold); border-left-color: var(--gold);
+      background: rgba(201,169,110,0.06);
+    }
+    .sidebar nav a.hidden { display: none; }
+    .sidebar-footer {
+      padding: 16px 20px; border-top: 1px solid var(--border-soft);
+      font-size: 10px; color: var(--silver); opacity: 0.5;
+    }
+    .sidebar-footer a { color: var(--gold); text-decoration: none; }
+    .sidebar-footer a:hover { text-decoration: underline; }
+
+    /* ─── MAIN CONTENT ─── */
+    .main {
+      margin-left: var(--sidebar-w); flex: 1;
+      padding: 48px 48px 80px;
+      max-width: 960px;
+    }
+
+    /* ─── DOC SECTIONS ─── */
+    .doc-section {
+      margin-bottom: 72px;
+      padding-bottom: 48px;
+      border-bottom: 1px solid var(--border-soft);
+    }
+    .doc-section:last-child { border-bottom: none; }
+
+    .doc-section h1 {
+      font-family: 'Cinzel', serif; font-size: clamp(24px, 4vw, 34px);
+      font-weight: 400; letter-spacing: 0.08em;
+      color: var(--cream); margin-bottom: 8px;
+    }
+    .doc-section h2 {
+      font-family: 'Cormorant Garamond', serif; font-size: 24px;
+      font-weight: 400; color: var(--cream);
+      margin: 40px 0 12px; letter-spacing: 0.02em;
+    }
+    .doc-section h3 {
+      font-family: 'Cormorant Garamond', serif; font-size: 19px;
+      font-weight: 400; color: var(--cream);
+      margin: 28px 0 10px;
+    }
+    .doc-section h4 {
+      font-family: 'Cormorant Garamond', serif; font-size: 16px;
+      font-weight: 600; color: var(--gold);
+      margin: 20px 0 8px;
+    }
+    .doc-section p {
+      font-size: 13px; color: var(--silver); line-height: 1.85;
+      margin-bottom: 14px;
+    }
+    .doc-section strong { color: var(--cream); font-weight: 400; }
+    .doc-section a {
+      color: var(--gold); text-decoration: none;
+      border-bottom: 1px solid rgba(201,169,110,0.3);
+      transition: border-color 0.2s;
+    }
+    .doc-section a:hover { border-bottom-color: var(--gold); }
+
+    /* Lists */
+    .doc-section ul, .doc-section ol {
+      padding-left: 20px; margin-bottom: 14px;
+    }
+    .doc-section li {
+      font-size: 13px; color: var(--silver); line-height: 1.85;
+      margin-bottom: 4px;
+    }
+    .doc-section li strong { color: var(--cream); }
+
+    /* Code blocks */
+    .doc-section pre {
+      background: var(--panel); border: 1px solid var(--border-soft);
+      padding: 16px 20px; margin: 12px 0 16px;
+      overflow-x: auto; font-size: 12px; line-height: 1.6;
+      color: var(--cream-dim);
+    }
+    .doc-section code {
+      font-family: 'DM Mono', monospace; font-size: 12px;
+    }
+    .doc-section p code, .doc-section li code {
+      background: var(--panel); border: 1px solid var(--border-soft);
+      padding: 2px 6px; font-size: 11px; color: var(--gold);
+      border-radius: 2px;
+    }
+
+    /* Tables */
+    .doc-section table {
+      width: 100%; border-collapse: collapse;
+      margin: 12px 0 20px; font-size: 12px;
+      border: 1px solid var(--border);
+    }
+    .doc-section th {
+      background: var(--panel); text-align: left;
+      padding: 10px 14px; font-weight: 400;
+      color: var(--gold); font-size: 10px;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      border-bottom: 1px solid var(--border);
+    }
+    .doc-section td {
+      padding: 8px 14px; color: var(--silver);
+      border-bottom: 1px solid var(--border-soft);
+    }
+    .doc-section tr:hover td { background: rgba(201,169,110,0.03); }
+
+    /* Blockquotes */
+    .doc-section blockquote {
+      border-left: 2px solid var(--gold-muted);
+      padding: 8px 16px; margin: 12px 0;
+      font-style: italic;
+      font-family: 'Cormorant Garamond', serif;
+      color: var(--cream-dim); font-size: 14px;
+    }
+
+    /* Dividers */
+    .doc-divider {
+      display: flex; align-items: center; gap: 12px;
+      margin: 40px 0;
+    }
+    .doc-divider .line { flex: 1; height: 1px; background: var(--border); }
+    .doc-divider .diamond {
+      width: 5px; height: 5px; flex-shrink: 0;
+      border: 1px solid var(--gold); transform: rotate(45deg);
+    }
+
+    /* Screenshot cards */
+    .screenshot-card {
+      border: 1px solid var(--border); background: var(--panel);
+      margin-bottom: 20px; overflow: hidden;
+    }
+    .screenshot-card img {
+      width: 100%; display: block;
+      border-bottom: 1px solid var(--border-soft);
+    }
+    .screenshot-info { padding: 16px 20px; }
+    .screenshot-tag {
+      font-size: 8px; letter-spacing: 0.25em; text-transform: uppercase;
+      color: var(--green); border: 1px solid var(--green);
+      padding: 2px 8px; display: inline-block; margin-bottom: 8px;
+    }
+    .screenshot-card h3 {
+      font-family: 'Cormorant Garamond', serif; font-size: 18px;
+      font-weight: 400; color: var(--cream); margin-bottom: 6px;
+    }
+    .screenshot-card p { font-size: 12px; color: var(--silver); line-height: 1.7; }
+
+    /* ASCII diagrams */
+    .doc-section pre.diagram {
+      background: var(--ink); border: 1px dashed var(--border-soft);
+      color: var(--gold-muted); text-align: center;
+    }
+
+    /* ─── FOOTER ─── */
+    .page-footer {
+      margin-left: var(--sidebar-w); padding: 32px 48px;
+      border-top: 1px solid var(--border-soft);
+      text-align: center; position: relative; z-index: 1;
+    }
+    .page-footer p { font-size: 11px; color: var(--silver); margin-bottom: 8px; }
+    .page-footer a { color: var(--gold); text-decoration: none; }
+    .page-footer a:hover { text-decoration: underline; }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 860px) {
+      .hamburger { display: block; }
+      .topnav-links { display: none; }
+      .topnav-links.open {
+        display: flex; flex-direction: column;
+        position: absolute; top: 56px; left: 0; right: 0;
+        background: rgba(10,10,10,0.96); backdrop-filter: blur(12px);
+        padding: 16px 24px; gap: 12px;
+        border-bottom: 1px solid var(--border-soft);
+      }
+      .sidebar {
+        transform: translateX(-100%); width: 280px;
+        box-shadow: 4px 0 20px rgba(0,0,0,0.5);
+      }
+      .sidebar.open { transform: translateX(0); }
+      .main { margin-left: 0; padding: 32px 20px 60px; }
+      .page-footer { margin-left: 0; padding: 24px 20px; }
+      .sidebar-overlay {
+        display: none; position: fixed; inset: 0; top: 56px;
+        background: rgba(0,0,0,0.5); z-index: 49;
+      }
+      .sidebar-overlay.open { display: block; }
+    }
+    @media (max-width: 480px) {
+      .doc-section table { font-size: 10px; }
+      .doc-section th, .doc-section td { padding: 6px 8px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ═══ TOP NAV ═══ -->
+  <header class="topnav">
+    <a href="../index.html" class="topnav-logo"><span>A</span>tlasConvert</a>
+    <button class="hamburger" onclick="toggleMobileMenu()" aria-label="Menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
+    <div class="topnav-links" id="topnavLinks">
+      <a href="../index.html">Landing</a>
+      <a href="../playground.html">Playground</a>
+      <a href="index.html" class="active">Docs</a>
+      <a href="../themes.html">Themes</a>
+    </div>
+  </header>
+
+  <!-- ═══ MOBILE OVERLAY ═══ -->
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+  <div class="layout">
+
+    <!-- ═══ SIDEBAR ═══ -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-search" style="position:relative;">
+        <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--gold-muted)" stroke-width="1.5"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input type="text" id="searchInput" placeholder="Search docs…" oninput="filterSections(this.value)">
+      </div>
+      <div class="sidebar-section">Navigation</div>
+      <nav id="sidebarNav">
+        <a href="#overview" class="active" data-section="overview">Overview</a>
+        <a href="#features" data-section="features">Features</a>
+        <a href="#api-reference" data-section="api-reference">API Reference</a>
+        <a href="#architecture" data-section="architecture">Architecture</a>
+        <a href="#integrations" data-section="integrations">Integrations</a>
+        <a href="#comparisons" data-section="comparisons">Comparisons</a>
+        <a href="#use-cases" data-section="use-cases">Use Cases</a>
+        <a href="#screenshots" data-section="screenshots">Screenshots</a>
+      </nav>
+      <div class="sidebar-footer">
+        <a href="../index.html">← Back to site</a><br>
+        Apache 2.0 License
+      </div>
+    </aside>
+
+    <!-- ═══ MAIN CONTENT ═══ -->
+    <main class="main">
+
+      <!-- ─── OVERVIEW ─── -->
+      <section class="doc-section" id="overview">
+        <h1>Overview</h1>
+
+        <h2>What is AtlasConvert?</h2>
+        <p>AtlasConvert is an interactive museum and conversion engine for measurement systems across civilizations. It bridges the gap between modern currencies, historical coins, traditional regional units, and standard metric/imperial systems.</p>
+
+        <h2>The Problem</h2>
+        <p>Every day, historians, writers, students, and curious minds face the same challenge: understanding historical and traditional measurements. AI models systematically fail at these questions — they hallucinate conversion rates, confuse historical periods, and invent values. Standard converters handle only modern units. Wikipedia provides context but no direct answers.</p>
+
+        <h2>The Solution</h2>
+        <p>AtlasConvert provides a <strong>deterministic conversion engine</strong> combined with rich contextual data:</p>
+        <ul>
+          <li><strong>15+ historical coins</strong> with academic purchasing power data</li>
+          <li><strong>17 traditional regional units</strong> across 7 civilizations</li>
+          <li><strong>170+ modern currencies</strong> with live exchange rates</li>
+          <li><strong>AI-powered assistance</strong> that never hallucinates conversions</li>
+          <li><strong>Trilingual interface</strong> (French, English, Arabic with RTL support)</li>
+        </ul>
+
+        <h2>Key Differentiators</h2>
+        <table>
+          <thead>
+            <tr><th>Feature</th><th>AtlasConvert</th><th>Standard Converters</th><th>AI Models</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Historical coins</td><td>15+ coins</td><td>No</td><td>Hallucinates</td></tr>
+            <tr><td>Traditional units</td><td>17 units</td><td>No</td><td>Inaccurate</td></tr>
+            <tr><td>Live rates</td><td>170+ currencies</td><td>Yes</td><td>Outdated</td></tr>
+            <tr><td>Context</td><td>Academic sources</td><td>No</td><td>Generic</td></tr>
+            <tr><td>Deterministic</td><td>Always accurate</td><td>Yes</td><td>Non-deterministic</td></tr>
+            <tr><td>Offline</td><td>PWA</td><td>No</td><td>No</td></tr>
+          </tbody>
+        </table>
+
+        <h2>Technology</h2>
+        <ul>
+          <li><strong>Frontend:</strong> React, TypeScript, Tailwind CSS</li>
+          <li><strong>Backend:</strong> Serverless Functions (Vercel)</li>
+          <li><strong>Database:</strong> Cloud Firestore</li>
+          <li><strong>AI:</strong> Google Gemini with tool-calling</li>
+          <li><strong>Auth:</strong> Firebase Auth</li>
+          <li><strong>Hosting:</strong> Vercel (Global CDN)</li>
+        </ul>
+
+        <h2>Live Application</h2>
+        <p>👉 <a href="https://atlas-convert.vercel.app" target="_blank">https://atlas-convert.vercel.app</a></p>
+      </section>
+
+      <!-- ─── FEATURES ─── -->
+      <section class="doc-section" id="features">
+        <h1>Features</h1>
+
+        <h2>Historical Museum</h2>
+        <p>Explore <strong>15+ ancient coins</strong> from civilizations spanning three millennia. Each coin includes:</p>
+        <ul>
+          <li>Academic purchasing power estimates</li>
+          <li>Precious metal content and current spot values</li>
+          <li>Historical context and anecdotes</li>
+          <li>Live conversion to modern currencies</li>
+          <li>Geographic origin on interactive map</li>
+        </ul>
+
+        <h3>Supported Historical Coins</h3>
+        <table>
+          <thead><tr><th>Coin</th><th>Civilization</th><th>Era</th><th>Metal</th><th>Purchasing Power</th></tr></thead>
+          <tbody>
+            <tr><td>Roman Denarius</td><td>Roman Empire</td><td>211 BC – 284 AD</td><td>Silver</td><td>~1 day's wage</td></tr>
+            <tr><td>Islamic Gold Dinar</td><td>Umayyad/Abbasid</td><td>696 – 1258 AD</td><td>Gold</td><td>Significant</td></tr>
+            <tr><td>Byzantine Solidus</td><td>Byzantine Empire</td><td>309 – 1453 AD</td><td>Gold</td><td>International standard</td></tr>
+            <tr><td>Spanish Piece of Eight</td><td>Spanish Empire</td><td>1497 – 1821</td><td>Silver</td><td>Global trade currency</td></tr>
+            <tr><td>Louis d'Or</td><td>Kingdom of France</td><td>1640 – 1795</td><td>Gold</td><td>Royal standard</td></tr>
+            <tr><td>Athenian Drachma</td><td>Ancient Greece</td><td>510 – 38 BC</td><td>Silver</td><td>Daily commerce</td></tr>
+            <tr><td>Florentine Florin</td><td>Republic of Florence</td><td>1252 – 1533</td><td>Gold</td><td>Banking standard</td></tr>
+            <tr><td>Venetian Ducat</td><td>Republic of Venice</td><td>1284 – 1797</td><td>Gold</td><td>Trade currency</td></tr>
+            <tr><td>Roman Sestertius</td><td>Roman Empire</td><td>211 BC – 284 AD</td><td>Bronze</td><td>Daily denomination</td></tr>
+            <tr><td>British Sovereign</td><td>British Empire</td><td>1817 – present</td><td>Gold</td><td>Gold standard</td></tr>
+            <tr><td>Egyptian Silver Kite</td><td>Ancient Egypt</td><td>1550 – 1070 BC</td><td>Silver</td><td>Early currency</td></tr>
+            <tr><td>Carthaginian Shekel</td><td>Carthage</td><td>300 – 146 BC</td><td>Silver</td><td>Trade currency</td></tr>
+            <tr><td>Persian Gold Daric</td><td>Achaemenid Empire</td><td>520 – 330 BC</td><td>Gold</td><td>Imperial standard</td></tr>
+            <tr><td>Mughal Silver Rupee</td><td>Mughal Empire</td><td>1540 – 1835</td><td>Silver</td><td>Subcontinental trade</td></tr>
+            <tr><td>Chinese Silver Sycee</td><td>Imperial China</td><td>600 BC – 1900 AD</td><td>Silver</td><td>Regional commerce</td></tr>
+          </tbody>
+        </table>
+
+        <h2>Traditional Regional Units</h2>
+        <p>Discover <strong>17 measurement systems</strong> from Morocco, Saudi Arabia, Ottoman Empire, Japan, Rome, China, and literary traditions.</p>
+
+        <h3>By Region</h3>
+        <h4>Morocco</h4>
+        <table>
+          <thead><tr><th>Unit</th><th>Type</th><th>Equivalent</th></tr></thead>
+          <tbody>
+            <tr><td>Abra</td><td>Weight</td><td>~12.5 kg</td></tr>
+            <tr><td>Moud</td><td>Volume</td><td>~3.125 L</td></tr>
+            <tr><td>Kala</td><td>Length</td><td>~0.64 m</td></tr>
+            <tr><td>Kharouba</td><td>Weight</td><td>~0.00018 kg</td></tr>
+          </tbody>
+        </table>
+
+        <h4>Saudi Arabia</h4>
+        <table>
+          <thead><tr><th>Unit</th><th>Type</th><th>Equivalent</th></tr></thead>
+          <tbody>
+            <tr><td>Prophetic Sa'a</td><td>Volume</td><td>~2.518 L</td></tr>
+            <tr><td>Farsakh</td><td>Distance</td><td>~5.04 km</td></tr>
+          </tbody>
+        </table>
+
+        <h4>Ottoman Empire</h4>
+        <table>
+          <thead><tr><th>Unit</th><th>Type</th><th>Equivalent</th></tr></thead>
+          <tbody>
+            <tr><td>Dirhem</td><td>Weight</td><td>~3.207 g</td></tr>
+            <tr><td>Arshin</td><td>Length</td><td>~0.68 m</td></tr>
+          </tbody>
+        </table>
+
+        <h4>Japan</h4>
+        <table>
+          <thead><tr><th>Unit</th><th>Type</th><th>Equivalent</th></tr></thead>
+          <tbody>
+            <tr><td>Shaku</td><td>Length</td><td>~0.303 m</td></tr>
+            <tr><td>Tatami Jo</td><td>Area</td><td>~1.65 m²</td></tr>
+          </tbody>
+        </table>
+
+        <h4>Rome</h4>
+        <table>
+          <thead><tr><th>Unit</th><th>Type</th><th>Equivalent</th></tr></thead>
+          <tbody>
+            <tr><td>Pes</td><td>Length</td><td>~0.296 m</td></tr>
+            <tr><td>Jugerum</td><td>Area</td><td>~2,518 m²</td></tr>
+          </tbody>
+        </table>
+
+        <h4>China</h4>
+        <table>
+          <thead><tr><th>Unit</th><th>Type</th><th>Equivalent</th></tr></thead>
+          <tbody>
+            <tr><td>Li</td><td>Distance</td><td>~500 m</td></tr>
+            <tr><td>Tael</td><td>Weight</td><td>~0.0375 kg</td></tr>
+          </tbody>
+        </table>
+
+        <h4>Literary</h4>
+        <table>
+          <thead><tr><th>Unit</th><th>Type</th><th>Equivalent</th></tr></thead>
+          <tbody>
+            <tr><td>French Lieue</td><td>Distance</td><td>~4,800 m</td></tr>
+            <tr><td>Russian Versta</td><td>Distance</td><td>~1,066.8 m</td></tr>
+            <tr><td>Biblical Cubit</td><td>Length</td><td>~0.457 m</td></tr>
+          </tbody>
+        </table>
+
+        <h2>Live Currency Converter</h2>
+        <p><strong>170+ world currencies</strong> with live exchange rates updated regularly.</p>
+        <h3>Features</h3>
+        <ul>
+          <li>Offline fallback to cached rates</li>
+          <li>Moroccan colloquial currencies (Rials, Scentims)</li>
+          <li>Precious metal spot prices (Gold, Silver)</li>
+          <li>Historical rate charts (7-day and 30-day)</li>
+        </ul>
+
+        <h3>Special: Moroccan Colloquial Engine</h3>
+        <p>AtlasConvert uniquely supports Moroccan folk currencies with accurate conversions and contextual guidance for souk pricing and common purchases.</p>
+
+        <h2>AI-Powered Assistant</h2>
+        <p>A specialized numismatic and metrological AI that <strong>never hallucinates</strong> conversion values.</p>
+        <h3>How It Works</h3>
+        <ol>
+          <li>User asks a question in natural language</li>
+          <li>AI explains the historical context</li>
+          <li>AI calls the deterministic conversion engine via tool-calling</li>
+          <li>Accurate result is returned with context</li>
+        </ol>
+
+        <h3>5 AI Playground Modes</h3>
+        <table>
+          <thead><tr><th>Mode</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Narrative Generator</strong></td><td>Create immersive historical scenes with accurate economics</td></tr>
+            <tr><td><strong>Text Validator</strong></td><td>Verify historical texts for monetary coherence</td></tr>
+            <tr><td><strong>Character Builder</strong></td><td>Generate historical character profiles with period-accurate finances</td></tr>
+            <tr><td><strong>Market Simulator</strong></td><td>Estimate historical commodity prices in modern currencies</td></tr>
+            <tr><td><strong>Measurement Decoder</strong></td><td>Convert archaic units found in historical texts</td></tr>
+          </tbody>
+        </table>
+
+        <h2>Interactive Atlas Map</h2>
+        <p>A beautifully crafted SVG world map showing:</p>
+        <ul>
+          <li>Geographic origins of ancient civilizations</li>
+          <li>Color-coded markers by metal type (gold, silver, bronze)</li>
+          <li>Animated civilization markers</li>
+          <li>Auto-tour mode cycling through all locations</li>
+          <li>Click-to-convert and click-to-read interactions</li>
+        </ul>
+
+        <h2>8 Premium Themes</h2>
+        <p>Obsidian-inspired themes for every taste:</p>
+        <table>
+          <thead><tr><th>Theme</th><th>Style</th></tr></thead>
+          <tbody>
+            <tr><td>Classic</td><td>Brown/gold museum aesthetic</td></tr>
+            <tr><td>Rose Gold</td><td>Elegant pink tones</td></tr>
+            <tr><td>Onyx</td><td>Black and gold luxury</td></tr>
+            <tr><td>Emerald</td><td>Green and dark teal</td></tr>
+            <tr><td>Cyberpunk</td><td>Neon pink/cyan on black</td></tr>
+            <tr><td>Dracula</td><td>Purple and dark gray</td></tr>
+            <tr><td>Nord</td><td>Ice blue and steel</td></tr>
+            <tr><td>Catppuccin</td><td>Lavender and deep blue</td></tr>
+          </tbody>
+        </table>
+
+        <h2>Power Tools</h2>
+        <p>Advanced features for power users:</p>
+        <ul>
+          <li><strong>Custom Units:</strong> Create your own measurement units with formulas</li>
+          <li><strong>Scratchpad:</strong> Take notes during conversions</li>
+          <li><strong>Calculator:</strong> Perform intermediate calculations</li>
+          <li><strong>Unit Proposal:</strong> Submit units for community approval</li>
+        </ul>
+
+        <h2>Widget Embeddable</h2>
+        <p>Embed the converter on any website:</p>
+        <ul>
+          <li>Customizable theme and language</li>
+          <li>Configurable default units</li>
+          <li>Responsive design</li>
+          <li>CSP-compatible iframe</li>
+        </ul>
+
+        <h2>PWA — Installable &amp; Offline-Ready</h2>
+        <ul>
+          <li>Install on any device (iOS, Android, Desktop)</li>
+          <li>Works offline with cached data</li>
+          <li>Background sync when reconnected</li>
+          <li>Push notification ready (planned)</li>
+        </ul>
+
+        <h2>Legal Compliance</h2>
+        <ul>
+          <li>Privacy Policy</li>
+          <li>Terms of Service</li>
+          <li>About page</li>
+          <li>Contact information</li>
+          <li>GDPR-ready data handling</li>
+        </ul>
+      </section>
+
+      <!-- ─── API REFERENCE ─── -->
+      <section class="doc-section" id="api-reference">
+        <h1>API Documentation</h1>
+
+        <h2>Overview</h2>
+        <p>AtlasConvert provides a public REST API for programmatic access to historical conversions, traditional units, and live exchange rates.</p>
+        <p><strong>Base URL:</strong> <code>https://atlas-convert.vercel.app/api</code></p>
+
+        <h2>Authentication</h2>
+        <h3>API Key</h3>
+        <p>Include your API key in one of three ways:</p>
+<pre># Header (recommended)
+curl -H "X-API-Key: ac_your_key_here" https://atlas-convert.vercel.app/api/currencies
+
+# Bearer token
+curl -H "Authorization: Bearer ac_your_key_here" https://atlas-convert.vercel.app/api/currencies
+
+# Query parameter
+curl "https://atlas-convert.vercel.app/api/currencies?apiKey=ac_your_key_here"</pre>
+
+        <h3>API Tiers</h3>
+        <table>
+          <thead><tr><th>Tier</th><th>Usage</th><th>Best For</th></tr></thead>
+          <tbody>
+            <tr><td>Sandbox</td><td>Free tier</td><td>Testing &amp; personal projects</td></tr>
+            <tr><td>Pro</td><td>High volume</td><td>Production apps &amp; integrations</td></tr>
+            <tr><td>Enterprise</td><td>Very high volume</td><td>Large-scale deployments</td></tr>
+          </tbody>
+        </table>
+        <p>Contact us for pricing details and custom quotas.</p>
+
+        <h2>Endpoints</h2>
+
+        <h3>Historical Currency Conversion</h3>
+        <p>Convert ancient coins to modern currencies using purchasing power or metal value.</p>
+<pre>GET/POST /api/convert/historical</pre>
+        <p><strong>Parameters:</strong></p>
+        <table>
+          <thead><tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><code>from</code></td><td>string</td><td>Yes</td><td>Historical coin ID</td></tr>
+            <tr><td><code>to</code></td><td>string</td><td>Yes</td><td>Target currency code</td></tr>
+            <tr><td><code>amount</code></td><td>number</td><td>No</td><td>Amount to convert (default: 1)</td></tr>
+            <tr><td><code>method</code></td><td>string</td><td>No</td><td><code>purchasing_power</code> or <code>metal_value</code> (default: <code>purchasing_power</code>)</td></tr>
+          </tbody>
+        </table>
+
+        <p><strong>Available Coins:</strong></p>
+        <table>
+          <thead><tr><th>ID</th><th>Name</th></tr></thead>
+          <tbody>
+            <tr><td><code>roman_denarius</code></td><td>Roman Denarius</td></tr>
+            <tr><td><code>islamic_dinar</code></td><td>Islamic Gold Dinar</td></tr>
+            <tr><td><code>byzantine_solidus</code></td><td>Byzantine Solidus</td></tr>
+            <tr><td><code>spanish_real</code></td><td>Spanish Piece of Eight</td></tr>
+            <tr><td><code>louis_dor</code></td><td>Louis d'Or</td></tr>
+            <tr><td><code>greek_drachma</code></td><td>Athenian Drachma</td></tr>
+            <tr><td><code>florentine_florin</code></td><td>Florentine Florin</td></tr>
+            <tr><td><code>venetian_ducat</code></td><td>Venetian Ducat</td></tr>
+            <tr><td><code>roman_sestertius</code></td><td>Roman Sestertius</td></tr>
+            <tr><td><code>british_sovereign</code></td><td>British Sovereign</td></tr>
+            <tr><td><code>egyptian_kite_silver</code></td><td>Egyptian Silver Kite</td></tr>
+            <tr><td><code>carthaginian_shekel</code></td><td>Carthaginian Shekel</td></tr>
+            <tr><td><code>persian_daric</code></td><td>Persian Gold Daric</td></tr>
+            <tr><td><code>mughal_rupee</code></td><td>Mughal Silver Rupee</td></tr>
+            <tr><td><code>chinese_sycee</code></td><td>Chinese Silver Sycee</td></tr>
+          </tbody>
+        </table>
+
+        <p><strong>Example Request:</strong></p>
+<pre>curl "https://atlas-convert.vercel.app/api/convert/historical?from=roman_denarius&to=usd&amount=1"</pre>
+
+        <p><strong>Example Response:</strong></p>
+<pre>{
+  "success": true,
+  "from": "roman_denarius",
+  "to": "usd",
+  "amount": 1,
+  "result": 120.00,
+  "method": "purchasing_power",
+  "context": "1 Denarius ≈ 1 day's wage for a legionary soldier",
+  "confidence": "high",
+  "accuracy": {
+    "basis": "purchasing_power",
+    "period": "1st century AD",
+    "region": "Roman Empire"
+  },
+  "sources": [
+    "Goldberg, R.A. (2007). 'The Denarius in the Roman Economy'",
+    "Harper, D. (2023). 'Economics of the Ancient World'"
+  ]
+}</pre>
+
+        <h3>Traditional Unit Conversion</h3>
+        <p>Convert traditional regional units to standard measurements.</p>
+<pre>GET/POST /api/convert/traditional</pre>
+        <p><strong>Parameters:</strong></p>
+        <table>
+          <thead><tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><code>from</code></td><td>string</td><td>Yes</td><td>Traditional unit ID</td></tr>
+            <tr><td><code>to</code></td><td>string</td><td>Yes</td><td>Target unit code</td></tr>
+            <tr><td><code>amount</code></td><td>number</td><td>No</td><td>Amount to convert (default: 1)</td></tr>
+          </tbody>
+        </table>
+
+        <p><strong>Available Traditional Units:</strong></p>
+        <table>
+          <thead><tr><th>ID</th><th>Name</th><th>Region</th></tr></thead>
+          <tbody>
+            <tr><td><code>abra</code></td><td>Abra</td><td>Morocco</td></tr>
+            <tr><td><code>moud</code></td><td>Moud</td><td>Morocco</td></tr>
+            <tr><td><code>kala</code></td><td>Kala</td><td>Morocco</td></tr>
+            <tr><td><code>kharouba</code></td><td>Kharouba</td><td>Morocco</td></tr>
+            <tr><td><code>prophetic_saa</code></td><td>Prophetic Sa'a</td><td>Saudi Arabia</td></tr>
+            <tr><td><code>farsakh</code></td><td>Farsakh</td><td>Saudi Arabia</td></tr>
+            <tr><td><code>dirhem</code></td><td>Dirhem</td><td>Ottoman Empire</td></tr>
+            <tr><td><code>arshin</code></td><td>Arshin</td><td>Ottoman Empire</td></tr>
+            <tr><td><code>shaku</code></td><td>Shaku</td><td>Japan</td></tr>
+            <tr><td><code>tatami_jo</code></td><td>Tatami Jo</td><td>Japan</td></tr>
+            <tr><td><code>pes</code></td><td>Pes</td><td>Rome</td></tr>
+            <tr><td><code>jugerum</code></td><td>Jugerum</td><td>Rome</td></tr>
+            <tr><td><code>li</code></td><td>Li</td><td>China</td></tr>
+            <tr><td><code>tael</code></td><td>Tael</td><td>China</td></tr>
+            <tr><td><code>french_toise</code></td><td>French Toise</td><td>France</td></tr>
+            <tr><td><code>russian_versta</code></td><td>Russian Versta</td><td>Russia</td></tr>
+            <tr><td><code>biblical_cubit</code></td><td>Biblical Cubit</td><td>Ancient Near East</td></tr>
+          </tbody>
+        </table>
+
+        <p><strong>Example Request:</strong></p>
+<pre>curl "https://atlas-convert.vercel.app/api/convert/traditional?from=abra&to=kg&amount=1"</pre>
+
+        <p><strong>Example Response:</strong></p>
+<pre>{
+  "success": true,
+  "from": "abra",
+  "to": "kg",
+  "amount": 1,
+  "result": 12.5,
+  "unit_info": {
+    "name": "Abra",
+    "region": "Morocco",
+    "type": "weight",
+    "description": "Traditional Moroccan weight unit"
+  },
+  "confidence": "high"
+}</pre>
+
+        <h3>Standard Unit Conversion</h3>
+        <p>Convert between metric, imperial, and other standard units.</p>
+<pre>GET/POST /api/convert/official</pre>
+        <p><strong>Parameters:</strong></p>
+        <table>
+          <thead><tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><code>from</code></td><td>string</td><td>Yes</td><td>Source unit code</td></tr>
+            <tr><td><code>to</code></td><td>string</td><td>Yes</td><td>Target unit code</td></tr>
+            <tr><td><code>amount</code></td><td>number</td><td>No</td><td>Amount to convert (default: 1)</td></tr>
+          </tbody>
+        </table>
+
+        <p><strong>Supported Categories:</strong></p>
+        <ul>
+          <li>Currency (170+ currencies)</li>
+          <li>Distance (m, km, mi, ft, in, etc.)</li>
+          <li>Weight (kg, g, lb, oz, etc.)</li>
+          <li>Temperature (°C, °F, K)</li>
+          <li>Area (m², km², acre, etc.)</li>
+          <li>Volume (L, mL, gal, etc.)</li>
+          <li>Speed (km/h, mph, m/s, etc.)</li>
+          <li>Time (s, min, hr, day, etc.)</li>
+          <li>Data Storage (B, KB, MB, GB, TB)</li>
+          <li>And more...</li>
+        </ul>
+
+        <h3>Live Exchange Rates</h3>
+        <p>Get current exchange rates for all supported currencies.</p>
+<pre>GET /api/currencies</pre>
+        <p><strong>Example Response:</strong></p>
+<pre>{
+  "success": true,
+  "base": "USD",
+  "timestamp": "2026-07-12T12:00:00Z",
+  "rates": {
+    "EUR": 0.92,
+    "GBP": 0.79,
+    "MAD": 9.85,
+    "JPY": 149.50,
+    "XAU": 0.00048,
+    "XAG": 0.035
+  },
+  "source": "live"
+}</pre>
+
+        <h3>Historical Rate Charts</h3>
+        <p>Get historical exchange rate data for charting.</p>
+<pre>GET /api/history</pre>
+        <p><strong>Parameters:</strong></p>
+        <table>
+          <thead><tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><code>from</code></td><td>string</td><td>Yes</td><td>Source currency</td></tr>
+            <tr><td><code>to</code></td><td>string</td><td>Yes</td><td>Target currency</td></tr>
+            <tr><td><code>days</code></td><td>number</td><td>No</td><td>Number of days (7 or 30, default: 7)</td></tr>
+          </tbody>
+        </table>
+
+        <h2>Error Handling</h2>
+        <p>All errors follow a consistent format:</p>
+<pre>{
+  "success": false,
+  "error": {
+    "code": "INVALID_CURRENCY",
+    "message": "The currency code 'XYZ' is not supported"
+  }
+}</pre>
+
+        <h3>Error Codes</h3>
+        <table>
+          <thead><tr><th>Code</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><code>MISSING_API_KEY</code></td><td>No API key provided</td></tr>
+            <tr><td><code>INVALID_API_KEY</code></td><td>Invalid or revoked API key</td></tr>
+            <tr><td><code>QUOTA_EXCEEDED</code></td><td>Monthly request limit reached</td></tr>
+            <tr><td><code>RATE_LIMIT_EXCEEDED</code></td><td>Too many requests, slow down</td></tr>
+            <tr><td><code>MISSING_PARAMETERS</code></td><td>Required parameters missing</td></tr>
+            <tr><td><code>INVALID_CURRENCY</code></td><td>Unknown currency code</td></tr>
+            <tr><td><code>INVALID_COIN</code></td><td>Unknown historical coin ID</td></tr>
+            <tr><td><code>CONVERSION_ERROR</code></td><td>Calculation error</td></tr>
+          </tbody>
+        </table>
+
+        <h2>Rate Limits</h2>
+        <p>Rate limits are enforced per API key. Limits vary by tier:</p>
+        <table>
+          <thead><tr><th>Tier</th><th>Rate Limit</th></tr></thead>
+          <tbody>
+            <tr><td>Sandbox</td><td>Standard</td></tr>
+            <tr><td>Pro</td><td>High</td></tr>
+            <tr><td>Enterprise</td><td>Very high</td></tr>
+          </tbody>
+        </table>
+        <p>Rate limit headers are included in every response:</p>
+<pre>X-RateLimit-Limit: &lt;limit&gt;
+X-RateLimit-Remaining: &lt;remaining&gt;
+X-RateLimit-Reset: &lt;timestamp&gt;</pre>
+
+        <h2>SDKs &amp; Libraries</h2>
+        <p>Official SDKs are planned:</p>
+        <ul>
+          <li><strong>JavaScript/TypeScript</strong> (planned)</li>
+          <li><strong>Python</strong> (planned)</li>
+          <li><strong>Go</strong> (planned)</li>
+        </ul>
+        <p>For now, use any HTTP client to interact with the API.</p>
+      </section>
+
+      <!-- ─── ARCHITECTURE ─── -->
+      <section class="doc-section" id="architecture">
+        <h1>Architecture Overview</h1>
+        <p>This document provides a high-level overview of AtlasConvert's public-facing architecture.</p>
+
+        <h2>System Overview</h2>
+<pre class="diagram">┌─────────────────────────────────────────────────────────┐
+│                    CLIENT BROWSER                       │
+│  ┌─────────────────────────────────────────────────┐    │
+│  │          React PWA (Trilingual)                 │    │
+│  │  Converter · Museum · Map · AI Chat · Lab       │    │
+│  └──────────────────────┬──────────────────────────┘    │
+└─────────────────────────┼───────────────────────────────┘
+                          │ HTTPS
+┌─────────────────────────▼───────────────────────────────┐
+│                 SERVERLESS EDGE API                      │
+│  ┌────────────┐ ┌────────────┐ ┌────────────────────┐   │
+│  │ Conversion │ │  Currency  │ │  AI Assistant      │   │
+│  │   Engine   │ │    Data    │ │  (Tool-Calling)    │   │
+│  └────────────┘ └────────────┘ └────────────────────┘   │
+└─────────────────────────┬───────────────────────────────┘
+                          │
+┌─────────────────────────▼───────────────────────────────┐
+│              EXTERNAL DATA PROVIDERS                     │
+│  Exchange Rates · Metal Prices · Historical Data        │
+└─────────────────────────────────────────────────────────┘</pre>
+
+        <h2>Core Components</h2>
+        <h3>Client Layer</h3>
+        <table>
+          <thead><tr><th>Component</th><th>Technology</th><th>Purpose</th></tr></thead>
+          <tbody>
+            <tr><td>UI Framework</td><td>React</td><td>Component-based SPA</td></tr>
+            <tr><td>Styling</td><td>Tailwind CSS</td><td>Utility-first CSS</td></tr>
+            <tr><td>Animations</td><td>Motion</td><td>Micro-interactions</td></tr>
+            <tr><td>Charts</td><td>Recharts</td><td>Data visualization</td></tr>
+            <tr><td>State</td><td>React Context + Hooks</td><td>State management</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Server Layer</h3>
+        <table>
+          <thead><tr><th>Component</th><th>Technology</th><th>Purpose</th></tr></thead>
+          <tbody>
+            <tr><td>Runtime</td><td>Vercel Serverless</td><td>Edge functions</td></tr>
+            <tr><td>Database</td><td>Cloud Firestore</td><td>User data, history</td></tr>
+            <tr><td>Auth</td><td>Firebase Auth</td><td>User authentication</td></tr>
+            <tr><td>AI</td><td>Google Gemini</td><td>LLM with tool-calling</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Conversion Engines</h3>
+        <p>AtlasConvert uses three distinct conversion approaches:</p>
+        <ol>
+          <li><strong>Standard Conversion</strong> — Factor-based multiplicative conversions for modern units</li>
+          <li><strong>Historical Conversion</strong> — Purchasing power and metal value calculations</li>
+          <li><strong>Traditional Conversion</strong> — Regional unit conversions via base unit intermediary</li>
+        </ol>
+
+        <h3>AI Integration</h3>
+        <p>The AI assistant uses a tool-calling pattern:</p>
+<pre class="diagram">User Query → AI Model → Tool Call → Conversion Engine → Response
+                  ↓
+         Historical Context
+         (generated by AI)</pre>
+        <p>The AI explains history; the engine computes numbers. This ensures zero hallucination on conversion values.</p>
+
+        <h2>Security Model</h2>
+        <ul>
+          <li>Firebase Auth with Google OAuth + Email/Password</li>
+          <li>API key authentication for developer access</li>
+          <li>Role-based access control (free, premium, admin)</li>
+          <li>Rate limiting per API key tier</li>
+          <li>Input validation on all endpoints</li>
+        </ul>
+
+        <h2>Performance</h2>
+        <ul>
+          <li>Caching for exchange rates and metal prices</li>
+          <li>Edge deployment via Vercel CDN</li>
+          <li>PWA with offline caching</li>
+          <li>Code splitting for optimal load times</li>
+        </ul>
+      </section>
+
+      <!-- ─── INTEGRATIONS ─── -->
+      <section class="doc-section" id="integrations">
+        <h1>Integrations</h1>
+
+        <h2>Embedding AtlasConvert</h2>
+        <h3>Widget iframe</h3>
+        <p>Embed the AtlasConvert converter on any website with a simple iframe:</p>
+<pre>&lt;iframe
+  src="https://atlas-convert.vercel.app/widget?theme=classic&lang=en&category=currency"
+  width="100%"
+  height="600"
+  frameborder="0"
+  title="AtlasConvert Widget"
+&gt;&lt;/iframe&gt;</pre>
+
+        <h3>Widget Parameters</h3>
+        <table>
+          <thead><tr><th>Parameter</th><th>Options</th><th>Default</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><code>theme</code></td><td><code>classic</code>, <code>rosegold</code>, <code>onyx</code>, <code>emerald</code>, <code>cyberpunk</code>, <code>dracula</code>, <code>nord</code>, <code>catppuccin</code></td><td><code>classic</code></td><td>Visual theme</td></tr>
+            <tr><td><code>lang</code></td><td><code>en</code>, <code>fr</code>, <code>ar</code></td><td><code>en</code></td><td>Interface language</td></tr>
+            <tr><td><code>category</code></td><td><code>currency</code>, <code>distance</code>, <code>weight</code>, etc.</td><td><code>currency</code></td><td>Default conversion category</td></tr>
+            <tr><td><code>from</code></td><td>Unit ID</td><td>—</td><td>Default source unit</td></tr>
+            <tr><td><code>to</code></td><td>Unit ID</td><td>—</td><td>Default target unit</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Example: Moroccan Currency Widget</h3>
+<pre>&lt;iframe
+  src="https://atlas-convert.vercel.app/widget?theme=onyx&lang=fr&category=currency&from=MAD&to=USD"
+  width="100%"
+  height="500"
+  frameborder="0"
+&gt;&lt;/iframe&gt;</pre>
+
+        <h3>Example: Historical Converter Widget</h3>
+<pre>&lt;iframe
+  src="https://atlas-convert.vercel.app/widget?theme=classic&lang=en&category=currency&from=roman_denarius&to=usd"
+  width="100%"
+  height="500"
+  frameborder="0"
+&gt;&lt;/iframe&gt;</pre>
+
+        <h2>API Integration</h2>
+        <h3>LLM Tool Integration</h3>
+        <p>Add AtlasConvert as a tool in your AI agent:</p>
+<pre>{
+  "name": "convertHistoricalCurrency",
+  "description": "Convert historical coins to modern currencies",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "from": { "type": "string" },
+      "to": { "type": "string" },
+      "amount": { "type": "number", "default": 1 }
+    },
+    "required": ["from", "to"]
+  }
+}</pre>
+
+        <h3>RAG Pipeline Integration</h3>
+        <p>Use AtlasConvert as a retrieval source for historical economics:</p>
+<pre># Example: LangChain tool integration
+from langchain.tools import Tool
+
+atlas_tool = Tool(
+    name="HistoricalConversion",
+    func=lambda query: requests.get(
+        "https://atlas-convert.vercel.app/api/convert/historical",
+        params=parse_query(query),
+        headers={"X-API-Key": API_KEY}
+    ).json(),
+    description="Convert historical currencies to modern equivalents"
+)</pre>
+
+        <h3>Webhook Integration</h3>
+        <p>Subscribe to rate change events (planned):</p>
+<pre>{
+  "url": "https://your-webhook.com/atlasconvert",
+  "events": ["rate.significant_change", "new_coin.added"],
+  "filters": {
+    "currencies": ["USD", "EUR", "GBP"]
+  }
+}</pre>
+
+        <h2>CMS Integration</h2>
+        <h3>WordPress</h3>
+        <p>Add AtlasConvert to WordPress posts with a custom block:</p>
+<pre>// functions.php
+function atlasconvert_shortcode($atts) {
+    $atts = shortcode_atts(array(
+        'theme' => 'classic',
+        'lang' => 'en',
+        'category' => 'currency'
+    ), $atts);
+
+    return sprintf(
+        '&lt;iframe src="https://atlas-convert.vercel.app/widget?theme=%s&lang=%s&category=%s" width="100%%" height="500" frameborder="0"&gt;&lt;/iframe&gt;',
+        esc_attr($atts['theme']),
+        esc_attr($atts['lang']),
+        esc_attr($atts['category'])
+    );
+}
+add_shortcode('atlasconvert', 'atlasconvert_shortcode');</pre>
+        <p>Usage: <code>[atlasconvert theme="onyx" lang="fr" category="currency"]</code></p>
+
+        <h3>Notion</h3>
+        <p>Embed AtlasConvert in Notion pages using the <code>/embed</code> block:</p>
+        <ol>
+          <li>Type <code>/embed</code> in Notion</li>
+          <li>Paste: <code>https://atlas-convert.vercel.app/widget?theme=classic&lang=en</code></li>
+          <li>Resize as needed</li>
+        </ol>
+
+        <h3>Markdown</h3>
+        <p>Embed in Markdown files:</p>
+<pre>[![AtlasConvert](https://atlas-convert.vercel.app/media/icon-192.png)](https://atlas-convert.vercel.app)
+
+Try the [historical converter](https://atlas-convert.vercel.app) for accurate ancient currency values.</pre>
+
+        <h2>Mobile Integration</h2>
+        <h3>PWA Installation</h3>
+        <p>AtlasConvert can be installed as a PWA on any device:</p>
+        <p><strong>iOS (Safari):</strong></p>
+        <ol>
+          <li>Open AtlasConvert in Safari</li>
+          <li>Tap the Share button</li>
+          <li>Tap "Add to Home Screen"</li>
+        </ol>
+        <p><strong>Android (Chrome):</strong></p>
+        <ol>
+          <li>Open AtlasConvert in Chrome</li>
+          <li>Tap the menu (3 dots)</li>
+          <li>Tap "Add to Home Screen"</li>
+        </ol>
+        <p><strong>Desktop (Edge/Chrome):</strong></p>
+        <ol>
+          <li>Open AtlasConvert</li>
+          <li>Click the install icon in the address bar</li>
+          <li>Click "Install"</li>
+        </ol>
+
+        <h3>React Native (Planned)</h3>
+        <p>Native mobile apps are planned for V2.0:</p>
+<pre>// Planned: @atlasconvert/react-native
+import { AtlasConvert } from '@atlasconvert/react-native';
+
+&lt;AtlasConvert
+  theme="classic"
+  language="en"
+  category="currency"
+  onConversion={(result) => console.log(result)}
+/&gt;</pre>
+
+        <h2>Authentication Integration</h2>
+        <h3>Firebase Auth</h3>
+        <p>AtlasConvert uses Firebase Authentication. To integrate:</p>
+<pre>import { initializeApp } from 'firebase/app';
+import { getAuth, GoogleAuthProvider } from 'firebase/auth';
+
+const firebaseConfig = {
+  // Your config
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
+
+// Sign in
+signInWithPopup(auth, provider);</pre>
+
+        <h3>API Key Authentication</h3>
+        <p>For API access:</p>
+<pre>const response = await fetch('https://atlas-convert.vercel.app/api/convert/historical', {
+  headers: {
+    'X-API-Key': 'ac_your_key_here'
+  },
+  params: {
+    from: 'roman_denarius',
+    to: 'usd',
+    amount: 1
+  }
+});</pre>
+      </section>
+
+      <!-- ─── COMPARISONS ─── -->
+      <section class="doc-section" id="comparisons">
+        <h1>How AtlasConvert Compares</h1>
+
+        <h2>Comparison Matrix</h2>
+        <table>
+          <thead>
+            <tr><th>Feature</th><th>AtlasConvert</th><th>Google</th><th>ChatGPT</th><th>XE.com</th><th>Wolfram Alpha</th><th>Wikipedia</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Historical Coins</td><td>15+</td><td>No</td><td>Hallucinates</td><td>No</td><td>Limited</td><td>Text only</td></tr>
+            <tr><td>Traditional Units</td><td>17 units</td><td>No</td><td>Inaccurate</td><td>No</td><td>Limited</td><td>Text only</td></tr>
+            <tr><td>Live Rates</td><td>170+</td><td>Yes</td><td>No</td><td>Yes</td><td>Yes</td><td>No</td></tr>
+            <tr><td>Context</td><td>Academic</td><td>Generic</td><td>Generic</td><td>No</td><td>Scientific</td><td>Encyclopedia</td></tr>
+            <tr><td>Deterministic</td><td>Always</td><td>No</td><td>No</td><td>Yes</td><td>Yes</td><td>N/A</td></tr>
+            <tr><td>Offline</td><td>PWA</td><td>No</td><td>No</td><td>No</td><td>No</td><td>Cache</td></tr>
+            <tr><td>Trilingual</td><td>FR/EN/AR</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td></tr>
+            <tr><td>API</td><td>Public</td><td>No</td><td>Plugin</td><td>Yes</td><td>Yes</td><td>No</td></tr>
+            <tr><td>AI Assistant</td><td>Specialized</td><td>No</td><td>General</td><td>No</td><td>No</td><td>No</td></tr>
+            <tr><td>Free Tier</td><td>Yes</td><td>Yes</td><td>Limited</td><td>Limited</td><td>Yes</td><td>Yes</td></tr>
+          </tbody>
+        </table>
+
+        <h2>vs. Standard Currency Converters (XE, Google Finance)</h2>
+        <p><strong>What they do well:</strong></p>
+        <ul>
+          <li>Live exchange rates</li>
+          <li>Fast, simple conversions</li>
+          <li>Mobile apps</li>
+        </ul>
+        <p><strong>What they lack:</strong></p>
+        <ul>
+          <li>No historical coins</li>
+          <li>No traditional units</li>
+          <li>No cultural context</li>
+          <li>No educational value</li>
+          <li>No AI assistance</li>
+        </ul>
+        <p><strong>AtlasConvert advantage:</strong> Converts not just currencies, but entire measurement systems across civilizations with academic context.</p>
+
+        <h2>vs. AI Models (ChatGPT, Gemini, Claude)</h2>
+        <p><strong>What they do well:</strong></p>
+        <ul>
+          <li>Natural language understanding</li>
+          <li>General knowledge</li>
+          <li>Code generation</li>
+        </ul>
+        <p><strong>What they lack:</strong></p>
+        <ul>
+          <li>Systematic hallucination on historical rates</li>
+          <li>No live data access</li>
+          <li>No deterministic guarantees</li>
+          <li>No specialized metrology knowledge</li>
+        </ul>
+        <p><strong>AtlasConvert advantage:</strong> Uses AI for context, but delegates math to a deterministic engine. Zero hallucination risk on conversions.</p>
+
+        <h2>vs. Encyclopedias (Wikipedia)</h2>
+        <p><strong>What they do well:</strong></p>
+        <ul>
+          <li>Comprehensive written knowledge</li>
+          <li>Citations and references</li>
+          <li>Community-edited</li>
+        </ul>
+        <p><strong>What they lack:</strong></p>
+        <ul>
+          <li>No interactive conversion</li>
+          <li>No live calculations</li>
+          <li>Text-heavy, not actionable</li>
+          <li>No API access</li>
+        </ul>
+        <p><strong>AtlasConvert advantage:</strong> Turns encyclopedic knowledge into actionable, interactive conversions with live data.</p>
+
+        <h2>vs. Scientific Tools (Wolfram Alpha)</h2>
+        <p><strong>What they do well:</strong></p>
+        <ul>
+          <li>Scientific calculations</li>
+          <li>Mathematical rigor</li>
+          <li>Data visualization</li>
+        </ul>
+        <p><strong>What they lack:</strong></p>
+        <ul>
+          <li>Limited historical currency data</li>
+          <li>No cultural context</li>
+          <li>No traditional regional units</li>
+          <li>No AI narrative features</li>
+        </ul>
+        <p><strong>AtlasConvert advantage:</strong> Specialized in historical metrology with cultural context, not just mathematical conversion.</p>
+
+        <h2>Unique Value Proposition</h2>
+        <p>AtlasConvert occupies a unique position:</p>
+<pre class="diagram">                    INTERACTIVE
+                         ↑
+                         |
+        AtlasConvert ●   |
+                         |
+   HISTORICAL ←──────────┼──────────→ MODERN
+                         |
+                         |
+                         ↓
+                    DETERMINISTIC</pre>
+        <p>No other tool combines:</p>
+        <ol>
+          <li><strong>Historical accuracy</strong> with academic sources</li>
+          <li><strong>Deterministic computation</strong> (no hallucination)</li>
+          <li><strong>Cultural context</strong> and narrative</li>
+          <li><strong>AI integration</strong> with tool-calling safety</li>
+          <li><strong>Trilingual support</strong> with RTL</li>
+          <li><strong>Offline capability</strong> as a PWA</li>
+        </ol>
+
+        <h2>Why a Simple Converter Isn't Enough</h2>
+        <p>A standard converter answers: "What is 1 USD in EUR?"</p>
+        <p>AtlasConvert answers: "What was 1 Roman Denarius worth to a legionary soldier in 100 AD, and how does that compare to a modern daily wage?"</p>
+        <p>The difference is <strong>context</strong>. Historical value isn't just a number — it's purchasing power, social status, and economic context. AtlasConvert provides all three.</p>
+
+        <h2>Why a Simple Chatbot Isn't Enough</h2>
+        <p>Ask ChatGPT: "How much was a Byzantine Solidus worth?"</p>
+        <p>Response: "A Byzantine Solidus was worth approximately $200 in modern currency."</p>
+        <p><strong>Problems:</strong></p>
+        <ol>
+          <li>The number is wrong (it was worth much more)</li>
+          <li>No source cited</li>
+          <li>No context about purchasing power</li>
+          <li>No distinction between metal value and economic value</li>
+        </ol>
+        <p>AtlasConvert's response:</p>
+        <ul>
+          <li><strong>Purchasing Power:</strong> ~$500 (a month's wages for a soldier)</li>
+          <li><strong>Metal Value:</strong> ~$700 (7.3g of gold at current spot price)</li>
+          <li><strong>Context:</strong> International trade standard for 1,000+ years</li>
+          <li><strong>Sources:</strong> Goldberg (2007), Harper (2023)</li>
+        </ul>
+        <p>The difference is <strong>accuracy, context, and citations</strong>.</p>
+      </section>
+
+      <!-- ─── USE CASES ─── -->
+      <section class="doc-section" id="use-cases">
+        <h1>Use Cases</h1>
+        <p>AtlasConvert serves a wide range of users across multiple domains. Here are the primary use cases.</p>
+
+        <h2>Academic &amp; Research</h2>
+
+        <h3>Historical Economic Analysis</h3>
+        <p><strong>Problem:</strong> Researchers need accurate historical purchasing power data for economic analysis.</p>
+        <p><strong>Solution:</strong> AtlasConvert provides academically-sourced purchasing power estimates for 15+ historical coins.</p>
+        <blockquote>A researcher studying Roman trade routes needs to compare the value of a Denarius across different centuries. AtlasConvert provides decade-by-decade purchasing power data with source citations.</blockquote>
+        <p><strong>Benefit:</strong> Accurate, cited data for academic publications and research papers.</p>
+
+        <h3>Metrology Studies</h3>
+        <p><strong>Problem:</strong> Historians encounter unfamiliar measurement units in historical documents.</p>
+        <p><strong>Solution:</strong> AtlasConvert's Measurement Decoder mode identifies and converts archaic units to modern equivalents.</p>
+        <blockquote>A historian reading a 16th-century Ottoman tax record encounters "50 dirhems of silver." The Measurement Decoder converts this to 160.35 grams, with context about Ottoman weight standards.</blockquote>
+        <p><strong>Benefit:</strong> Instant understanding of historical documents without manual research.</p>
+
+        <h2>Creative Writing &amp; Publishing</h2>
+
+        <h3>Historical Fiction</h3>
+        <p><strong>Problem:</strong> Novelists need accurate period economics for believable stories.</p>
+        <p><strong>Solution:</strong> AtlasConvert provides context-aware conversions with narrative context.</p>
+        <blockquote>A writer setting a novel in 18th-century France needs to know what a Louis d'Or could buy. AtlasConvert shows it could buy a fine meal at a Parisian restaurant, equivalent to about $500 today.</blockquote>
+        <p><strong>Benefit:</strong> Authentic period details that enhance historical fiction.</p>
+
+        <h3>Game Development</h3>
+        <p><strong>Problem:</strong> Game designers need realistic historical pricing for in-game economies.</p>
+        <p><strong>Solution:</strong> AtlasConvert's Market Simulator estimates historical commodity prices.</p>
+        <blockquote>A game developer creating a medieval RPG needs to price a suit of armor. The Market Simulator shows a full suit cost about 10-15 Louis d'Or, roughly $5,000-$7,500 in modern terms.</blockquote>
+        <p><strong>Benefit:</strong> Historically accurate game economies that enhance immersion.</p>
+
+        <h2>Education</h2>
+
+        <h3>Classroom Learning</h3>
+        <p><strong>Problem:</strong> Teachers need engaging tools to teach measurement history.</p>
+        <p><strong>Solution:</strong> AtlasConvert's interactive Museum and Map make learning visual and engaging.</p>
+        <blockquote>A history teacher shows students the Atlas Map, tracing the geographic spread of Roman currency. Students click on coins to see their purchasing power and discuss economic influence.</blockquote>
+        <p><strong>Benefit:</strong> Interactive learning that makes history tangible.</p>
+
+        <h3>Curriculum Integration</h3>
+        <p><strong>Problem:</strong> Educators need resources that align with history and math curricula.</p>
+        <p><strong>Solution:</strong> AtlasConvert covers both measurement systems and their historical contexts.</p>
+        <blockquote>A math teacher uses AtlasConvert to teach unit conversion while incorporating historical context: "If a Roman merchant bought 10 jugerum of land, how many square meters is that?"</blockquote>
+        <p><strong>Benefit:</strong> Cross-disciplinary learning that connects math and history.</p>
+
+        <h2>Museums &amp; Cultural Institutions</h2>
+
+        <h3>Digital Companion</h3>
+        <p><strong>Problem:</strong> Museums need digital tools to enhance physical exhibitions.</p>
+        <p><strong>Solution:</strong> AtlasConvert can be embedded as a widget in museum websites and kiosks.</p>
+        <blockquote>A numismatic museum embeds AtlasConvert on their website. Visitors can explore coin values before visiting, and continue learning after with the AI assistant.</blockquote>
+        <p><strong>Benefit:</strong> Extended engagement beyond the physical visit.</p>
+
+        <h3>Exhibition Planning</h3>
+        <p><strong>Problem:</strong> Curators need accurate historical context for exhibition labels.</p>
+        <p><strong>Solution:</strong> AtlasConvert provides academic-grade data with source citations.</p>
+        <blockquote>A curator writing labels for a Byzantine exhibition uses AtlasConvert to get precise purchasing power data for Solidus coins, citing the academic sources directly.</blockquote>
+        <p><strong>Benefit:</strong> Accurate, sourced information for exhibition materials.</p>
+
+        <h2>Genealogy &amp; Family History</h2>
+
+        <h3>Interpreting Historical Records</h3>
+        <p><strong>Problem:</strong> Genealogists encounter old currencies and measurements in family documents.</p>
+        <p><strong>Solution:</strong> AtlasConvert converts historical units to modern equivalents.</p>
+        <blockquote>A genealogist finds an 1890 Moroccan tax record showing "500 Rials." AtlasConvert explains this equals 25 Dirhams, about $250 in modern value.</blockquote>
+        <p><strong>Benefit:</strong> Understanding ancestors' economic context.</p>
+
+        <h2>Tourism &amp; Cultural Heritage</h2>
+
+        <h3>Cultural Context</h3>
+        <p><strong>Problem:</strong> Tourists encounter unfamiliar units in historical sites.</p>
+        <p><strong>Solution:</strong> AtlasConvert provides instant context for traditional measurements.</p>
+        <blockquote>A tourist in Morocco hears prices in Rials at a souk. AtlasConvert helps them understand the actual value: "100 Rials = 5 Dirhams = about $0.50."</blockquote>
+        <p><strong>Benefit:</strong> Better cultural understanding and confident local interactions.</p>
+
+        <h2>AI &amp; LLM Development</h2>
+
+        <h3>Tool-Calling Integration</h3>
+        <p><strong>Problem:</strong> AI models hallucinate historical conversion rates.</p>
+        <p><strong>Solution:</strong> AtlasConvert's API provides deterministic, accurate conversions for LLM tool-calling.</p>
+        <blockquote>A developer building a historical research assistant integrates AtlasConvert's API. The LLM explains history while the API provides accurate numbers.</blockquote>
+        <p><strong>Benefit:</strong> Reliable AI applications without hallucination risk.</p>
+
+        <h3>RAG Pipeline Enhancement</h3>
+        <p><strong>Problem:</strong> RAG systems lack structured historical conversion data.</p>
+        <p><strong>Solution:</strong> AtlasConvert's API can be used as a retrieval source for historical economics.</p>
+        <blockquote>A RAG pipeline for historical research includes AtlasConvert as a tool. When users ask about historical values, the system retrieves accurate data instead of generating guesses.</blockquote>
+        <p><strong>Benefit:</strong> Accurate, structured data in AI-powered research tools.</p>
+
+        <h2>Professional Use</h2>
+
+        <h3>Translation &amp; Localization</h3>
+        <p><strong>Problem:</strong> Translators encounter archaic units in historical texts.</p>
+        <p><strong>Solution:</strong> AtlasConvert's Measurement Decoder converts historical units.</p>
+        <blockquote>A translator working on a 19th-century Russian novel encounters "5 versta." AtlasConvert converts this to 5.334 km, helping the translator choose an appropriate modern equivalent.</blockquote>
+        <p><strong>Benefit:</strong> Accurate translation of historical measurements.</p>
+
+        <h3>Journalism &amp; Fact-Checking</h3>
+        <p><strong>Problem:</strong> Journalists need to verify historical economic claims.</p>
+        <p><strong>Solution:</strong> AtlasConvert provides sourced, verifiable data.</p>
+        <blockquote>A journalist writing about the gold standard needs to verify that a British Sovereign contained 7.32g of gold. AtlasConvert confirms this with current spot prices.</blockquote>
+        <p><strong>Benefit:</strong> Fact-checked historical economics for accurate reporting.</p>
+
+        <h2>Personal Use</h2>
+
+        <h3>Curiosity &amp; Learning</h3>
+        <p><strong>Problem:</strong> Curious minds want to understand historical values.</p>
+        <p><strong>Solution:</strong> AtlasConvert makes historical economics accessible and engaging.</p>
+        <blockquote>Someone wonders: "How much was a knight's annual salary?" AtlasConvert shows a medieval knight earned about 100-200 gold coins per year, equivalent to $50,000-$100,000 today.</blockquote>
+        <p><strong>Benefit:</strong> Satisfying curiosity with accurate, contextual information.</p>
+
+        <h3>Travel Planning</h3>
+        <p><strong>Problem:</strong> Travelers want to understand historical pricing at destinations.</p>
+        <p><strong>Solution:</strong> AtlasConvert provides historical context for popular destinations.</p>
+        <blockquote>Planning a trip to Rome, someone uses AtlasConvert to understand what a Denarius could buy in ancient Rome, enriching their visit to the Colosseum.</blockquote>
+        <p><strong>Benefit:</strong> Deeper appreciation of historical sites.</p>
+      </section>
+
+      <!-- ─── SCREENSHOTS ─── -->
+      <section class="doc-section" id="screenshots">
+        <h1>Screenshots &amp; Media</h1>
+
+        <h2>Application Screenshots</h2>
+
+        <div class="screenshot-card">
+          <img src="../screenshots/converter.png" alt="Currency Converter" loading="lazy">
+          <div class="screenshot-info">
+            <span class="screenshot-tag">Core Feature</span>
+            <h3>Currency Converter</h3>
+            <p>Main converter with categories, Moroccan Colloquial Engine, live chart. Supports 170+ world currencies with real-time exchange rates and historical data.</p>
+          </div>
+        </div>
+
+        <div class="screenshot-card">
+          <img src="../screenshots/museum.png" alt="Historical Museum" loading="lazy">
+          <div class="screenshot-info">
+            <span class="screenshot-tag">Historical</span>
+            <h3>Historical Museum</h3>
+            <p>Ancient coins with purchasing power, metal value, and academic framework. Explore 15+ coins spanning three millennia of civilization.</p>
+          </div>
+        </div>
+
+        <div class="screenshot-card">
+          <img src="../screenshots/traditional-units.png" alt="Traditional Units" loading="lazy">
+          <div class="screenshot-info">
+            <span class="screenshot-tag">Metrology</span>
+            <h3>Traditional Units</h3>
+            <p>Region-filtered gallery with formula equivalencies. Discover 17 measurement systems from Morocco, Saudi Arabia, Ottoman Empire, Japan, Rome, China, and literary traditions.</p>
+          </div>
+        </div>
+
+        <div class="screenshot-card">
+          <img src="../screenshots/ai-agent.png" alt="AI Agent" loading="lazy">
+          <div class="screenshot-info">
+            <span class="screenshot-tag">AI-Powered</span>
+            <h3>AI Agent Run</h3>
+            <p>LLM tool-calling flow with JSON responses. The AI explains history while the deterministic engine computes accurate conversion values.</p>
+          </div>
+        </div>
+
+        <div class="screenshot-card">
+          <img src="../screenshots/api-playground.png" alt="API Playground" loading="lazy">
+          <div class="screenshot-info">
+            <span class="screenshot-tag">Developer</span>
+            <h3>API Playground</h3>
+            <p>REST API testbed with request builder and live response. Test all endpoints with interactive documentation and real-time results.</p>
+          </div>
+        </div>
+
+        <h2>Media Assets</h2>
+        <table>
+          <thead><tr><th>Asset</th><th>File</th><th>Purpose</th></tr></thead>
+          <tbody>
+            <tr><td>PWA Icon (192)</td><td><code>media/icon-192.png</code></td><td>Android home screen</td></tr>
+            <tr><td>PWA Icon (512)</td><td><code>media/icon-512.png</code></td><td>Splash screen, manifest</td></tr>
+            <tr><td>OG Cover</td><td><code>media/og-cover.png</code></td><td>Social media sharing</td></tr>
+            <tr><td>Wiki Images</td><td><code>media/wiki-images/*.png</code></td><td>17 historical coin illustrations</td></tr>
+          </tbody>
+        </table>
+
+        <h2>Taking More Screenshots</h2>
+        <p>To add more screenshots:</p>
+        <ol>
+          <li>Open <a href="https://atlas-convert.vercel.app" target="_blank">https://atlas-convert.vercel.app</a></li>
+          <li>Navigate to the desired section</li>
+          <li>Capture the screen (1920x1080 recommended)</li>
+          <li>Save to <code>screenshots/</code> directory</li>
+          <li>Update this file and the README</li>
+        </ol>
+
+        <h3>Recommended Additional Screenshots</h3>
+        <table>
+          <thead><tr><th>Section</th><th>Suggested Name</th></tr></thead>
+          <tbody>
+            <tr><td>Themes comparison</td><td><code>themes-comparison.png</code></td></tr>
+            <tr><td>AI Chat conversation</td><td><code>ai-chat-conversation.png</code></td></tr>
+            <tr><td>Atlas Map with markers</td><td><code>atlas-map-markers.png</code></td></tr>
+            <tr><td>Widget embed mode</td><td><code>widget-embed.png</code></td></tr>
+            <tr><td>Mobile view</td><td><code>mobile-view.png</code></td></tr>
+          </tbody>
+        </table>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ═══ FOOTER ═══ -->
+  <footer class="page-footer">
+    <p>
+      <a href="https://atlas-convert.vercel.app">Live App</a> ·
+      <a href="https://github.com/atlas-convert/atlas-convert">GitHub</a> ·
+      <a href="../index.html">Landing</a> ·
+      <a href="../playground.html">Playground</a> ·
+      <a href="../themes.html">Themes</a>
+    </p>
+    <p>Apache 2.0 License</p>
+  </footer>
+
+  <script>
+    /* ─── SIDEBAR SCROLL SPY ─── */
+    const sections = document.querySelectorAll('.doc-section');
+    const navLinks = document.querySelectorAll('#sidebarNav a');
+    const searchInput = document.getElementById('searchInput');
+
+    function setActiveLink() {
+      let current = '';
+      sections.forEach(s => {
+        const top = s.getBoundingClientRect().top;
+        if (top <= 120) current = s.id;
+      });
+      navLinks.forEach(a => {
+        a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+      });
+    }
+    window.addEventListener('scroll', setActiveLink, { passive: true });
+
+    /* ─── SEARCH FILTER ─── */
+    function filterSections(q) {
+      q = q.toLowerCase().trim();
+      navLinks.forEach(a => {
+        const section = document.getElementById(a.getAttribute('href').slice(1));
+        if (!section) return;
+        const text = section.textContent.toLowerCase();
+        const match = !q || text.includes(q) || a.textContent.toLowerCase().includes(q);
+        a.classList.toggle('hidden', !match);
+      });
+    }
+
+    /* ─── MOBILE SIDEBAR ─── */
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('open');
+      document.getElementById('sidebarOverlay').classList.toggle('open');
+    }
+    function closeSidebar() {
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('sidebarOverlay').classList.remove('open');
+    }
+    function toggleMobileMenu() {
+      var links = document.getElementById('topnavLinks');
+      var isOpen = links.classList.contains('open');
+      // Close topnav if open, toggle sidebar instead on mobile
+      if (window.innerWidth <= 860) {
+        toggleSidebar();
+      } else {
+        links.classList.toggle('open');
+      }
+    }
+
+    // Close sidebar on link click (mobile)
+    navLinks.forEach(a => {
+      a.addEventListener('click', () => {
+        if (window.innerWidth <= 860) closeSidebar();
+      });
+    });
+
+    // Init
+    setActiveLink();
+  </script>
+
+</body>
+</html>
